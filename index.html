@@ -127,7 +127,8 @@
   </style>
 </head>
 <body>
-
+  <div class="container">
+    <h1>JBレンタカー 簡易見積もり</h1>
 
     <div class="card">
       <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
@@ -371,7 +372,8 @@
         })
         .catch((err) => {
           console.error(err);
-          alert("コピーに失敗しました。ブラウザの設定を確認してください。");
+          // フォールバック：prompt() を表示
+          prompt("コピーに失敗しました。下記のテキストをコピーしてください。", copyText);
         });
     }
 
@@ -404,8 +406,8 @@
       const paymentDateObj = await getValidPaymentDate(lastEstimate.startObj);
       const paymentDateStr = formatDateGlobal(paymentDateObj);
       
-      // 延長案内テキスト（＊部分は変数で置換）
-      const extensionText = 
+      // 延長案内テキスト（選択したオプションのみ表示）
+      let extensionText = 
 `お世話になっております。 
 JBレンタカー石巻店です。
 
@@ -419,10 +421,24 @@ ${lastEstimate.startDateStr}でレンタカー契約が満了いたします。
 ご利用日数: ${lastEstimate.days}日間
 クラス: ${lastEstimate.carClass}
 基本料金: ¥${lastEstimate.basic.toLocaleString()}
-車両保険: ¥${lastEstimate.insurance.toLocaleString()}
-免責補償: ¥${lastEstimate.waiver.toLocaleString()}
-スタッドレスタイヤ: ¥${lastEstimate.tires.toLocaleString()}
-小計: ¥${lastEstimate.subtotal.toLocaleString()}
+`;
+      if (lastEstimate.insurance > 0) {
+        extensionText += `車両保険: ¥${lastEstimate.insurance.toLocaleString()}\n`;
+      }
+      if (lastEstimate.waiver > 0) {
+        extensionText += `免責補償: ¥${lastEstimate.waiver.toLocaleString()}\n`;
+      }
+      if (lastEstimate.tires > 0) {
+        extensionText += `スタッドレスタイヤ: ¥${lastEstimate.tires.toLocaleString()}\n`;
+      }
+      if (lastEstimate.etc > 0) {
+        extensionText += `ETC: ¥${lastEstimate.etc.toLocaleString()}\n`;
+      }
+      if (lastEstimate.gps > 0) {
+        extensionText += `カーナビ: ¥${lastEstimate.gps.toLocaleString()}\n`;
+      }
+      extensionText += 
+`\n小計: ¥${lastEstimate.subtotal.toLocaleString()}
 消費税(10%): ¥${lastEstimate.tax.toLocaleString()}
 合計金額: ¥${lastEstimate.total.toLocaleString()}
 
@@ -441,7 +457,8 @@ ${lastEstimate.startDateStr}でレンタカー契約が満了いたします。
         })
         .catch((err) => {
           console.error(err);
-          alert("コピーに失敗しました。ブラウザの設定を確認してください。");
+          // スマホ等で失敗した場合のフォールバック
+          prompt("コピーに失敗しました。下記のテキストをコピーしてください。", extensionText);
         });
     }
   </script>
