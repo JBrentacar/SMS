@@ -124,10 +124,16 @@
       padding-top: 10px;
       margin-top: 10px;
     }
+    /* hidden textarea for copy fallback */
+    #hiddenCopyTextArea {
+      position: absolute;
+      left: -9999px;
+    }
   </style>
 </head>
 <body>
-    <h1></h1>
+  <div class="container">
+    <h1>JBレンタカー 簡易見積もり</h1>
 
     <div class="card">
       <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
@@ -187,6 +193,9 @@
       <button class="copy-btn" onclick="copyExtensionNotice()">延長案内をコピーする</button>
     </div>
   </div>
+
+  <!-- hidden textarea for fallback copy -->
+  <textarea id="hiddenCopyTextArea" readonly></textarea>
 
   <script>
     // グローバルな日付フォーマット関数（例: 2025年03月15日(土)）
@@ -355,7 +364,29 @@
       };
     }
 
-    // 見積結果のコピー機能（各項目を「項目: 結果」改行区切りで結合）
+    // コピー処理の汎用関数（Clipboard API利用、なければ execCommandを利用）
+    function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        // Clipboard API が利用可能な場合
+        return navigator.clipboard.writeText(text);
+      } else {
+        // Clipboard APIが利用できない場合、古いexecCommandを使用する
+        const textArea = document.getElementById("hiddenCopyTextArea");
+        textArea.value = text;
+        textArea.style.display = "block";
+        textArea.select();
+        try {
+          document.execCommand("copy");
+        } catch (err) {
+          console.error("execCommand エラー:", err);
+          return Promise.reject(err);
+        }
+        textArea.style.display = "none";
+        return Promise.resolve();
+      }
+    }
+
+    // 見積結果のコピー機能
     function copyResult() {
       const rows = document.querySelectorAll("#resultContent .result-row");
       let copyText = "";
@@ -365,14 +396,13 @@
         copyText += `${label} ${value}\n`;
       });
       copyText = copyText.trim();
-      navigator.clipboard.writeText(copyText)
+      copyToClipboard(copyText)
         .then(() => {
           alert("見積結果をコピーしました！");
         })
         .catch((err) => {
           console.error(err);
-          // フォールバック：prompt() を表示
-          prompt("コピーに失敗しました。下記のテキストをコピーしてください。", copyText);
+          alert("コピーに失敗しました。");
         });
     }
 
@@ -450,14 +480,13 @@ ${lastEstimate.startDateStr}でレンタカー契約が満了いたします。
 
 以上、ご確認の上、ご連絡をお待ちしております。`;
       
-      navigator.clipboard.writeText(extensionText)
+      copyToClipboard(extensionText)
         .then(() => {
           alert("延長案内の内容をコピーしました！");
         })
         .catch((err) => {
           console.error(err);
-          // スマホ等で失敗した場合のフォールバック
-          prompt("コピーに失敗しました。下記のテキストをコピーしてください。", extensionText);
+          alert("コピーに失敗しました。");
         });
     }
   </script>
