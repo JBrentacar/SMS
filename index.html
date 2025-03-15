@@ -370,7 +370,8 @@
         .then(() => {
           alert("見積結果をコピーしました！");
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
           alert("コピーに失敗しました。ブラウザの設定を確認してください。");
         });
     }
@@ -439,7 +440,8 @@ ${lastEstimate.startDateStr}でレンタカー契約が満了いたします。
         .then(() => {
           alert("延長案内の内容をコピーしました！");
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
           alert("コピーに失敗しました。ブラウザの設定を確認してください。");
         });
     }
