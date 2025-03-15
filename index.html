@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> 簡易見積もり</title>
+  <title>簡易見積もり</title>
   <style>
     /* 全体の設定 */
     body {
@@ -127,7 +127,9 @@
   </style>
 </head>
 <body>
-  
+  <div class="container">
+    <h1>JBレンタカー 簡易見積もり</h1>
+
     <div class="card">
       <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
         <div class="section-title">基本情報</div>
@@ -182,23 +184,23 @@
       <div class="section-title">お見積もり結果</div>
       <div id="resultContent"></div>
       <button class="copy-btn" onclick="copyResult()">結果をコピーする</button>
+      <!-- 延長案内のコピー用ボタン -->
+      <button class="copy-btn" onclick="copyExtensionNotice()">延長案内をコピーする</button>
     </div>
   </div>
 
   <script>
     // 選択された車両クラスを格納する変数
     let selectedCarClass = "";
+    // 最新の見積結果を保存するオブジェクト
+    let lastEstimate = null;
 
     // 車両クラス選択ボタンの動作設定
     document.querySelectorAll(".car-class-btn").forEach(btn => {
       btn.addEventListener("click", function() {
-        // 全てのボタンからactiveクラスを削除
         document.querySelectorAll(".car-class-btn").forEach(b => b.classList.remove("active"));
-        // クリックされたボタンにactiveクラスを付与
         this.classList.add("active");
-        // 選択された値を格納
         selectedCarClass = this.getAttribute("data-value");
-        // エラー表示を消す
         document.getElementById("carClassError").style.display = "none";
       });
     });
@@ -218,7 +220,6 @@
     document.addEventListener('DOMContentLoaded', function() {
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("startDate").value = today;
-      // エラーメッセージの非表示設定
       document.getElementById("startDate").addEventListener("input", function() {
         document.getElementById("startDateError").style.display = "none";
       });
@@ -324,6 +325,24 @@
       document.getElementById("resultContent").innerHTML = resultHTML;
       document.getElementById("result").style.display = "block";
       document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
+
+      // 最新見積情報をグローバル変数に保存
+      lastEstimate = {
+        startObj: startObj,
+        returnDate: formatDate(returnObj),
+        days: days,
+        carClass: selectedCarClass,
+        basic: totalBaseRate,
+        insurance: insurance ? insuranceCost : 0,
+        waiver: waiver ? waiverCost : 0,
+        tires: tires ? tiresCost : 0,
+        etc: etc ? etcCost : 0,
+        gps: gps ? gpsCost : 0,
+        subtotal: subtotal,
+        tax: tax,
+        total: total,
+        startDateStr: formatDate(startObj)
+      };
     }
 
     // 見積結果のコピー機能（各項目を「項目: 結果」改行区切りで結合）
@@ -339,6 +358,64 @@
       navigator.clipboard.writeText(copyText)
         .then(() => {
           alert("見積結果をコピーしました！");
+        })
+        .catch(() => {
+          alert("コピーに失敗しました。ブラウザの設定を確認してください。");
+        });
+    }
+
+    // 延長案内のコピー機能
+    function copyExtensionNotice() {
+      if (!lastEstimate) {
+        alert("まず見積もりを計算してください。");
+        return;
+      }
+      // お振込期日は、ご利用開始日の前日として計算（※シンプルな例）
+      const paymentDateObj = new Date(lastEstimate.startObj);
+      paymentDateObj.setDate(paymentDateObj.getDate() - 1);
+      const formatDate = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+        return `${y}年${m}月${d}日(${weekdays[date.getDay()]})`;
+      };
+      const paymentDateStr = formatDate(paymentDateObj);
+      
+      // 延長案内テキスト（＊部分は変数として置換）
+      const extensionText = 
+`お世話になっております。 
+JBレンタカー石巻店です。
+
+${lastEstimate.startDateStr}（＊ご利用開始日と同じ日に設定）でレンタカー契約が満了いたします。 
+ご延長はどうなさいますか？
+
+ご延長の場合は、下記のとおりご案内致します。
+
+ご利用開始日: ${lastEstimate.startDateStr}
+ご返却日: ${lastEstimate.returnDate}
+ご利用日数: ${lastEstimate.days}日間
+クラス: ${lastEstimate.carClass}
+基本料金: ¥${lastEstimate.basic.toLocaleString()}
+車両保険: ¥${lastEstimate.insurance.toLocaleString()}
+免責補償: ¥${lastEstimate.waiver.toLocaleString()}
+スタッドレスタイヤ: ¥${lastEstimate.tires.toLocaleString()}
+小計: ¥${lastEstimate.subtotal.toLocaleString()}
+消費税(10%): ¥${lastEstimate.tax.toLocaleString()}
+合計金額: ¥${lastEstimate.total.toLocaleString()}
+
+お振込先
+七十七銀行新中里支店
+普通口座 5023291 
+株式会社NIKKEN
+
+お振込期日: ${paymentDateStr}（＊ご利用開始日前日に設定、前日が土日祝日の場合はさらに前日）
+
+以上、ご確認の上、ご連絡をお待ちしております。`;
+      
+      navigator.clipboard.writeText(extensionText)
+        .then(() => {
+          alert("延長案内の内容をコピーしました！");
         })
         .catch(() => {
           alert("コピーに失敗しました。ブラウザの設定を確認してください。");
