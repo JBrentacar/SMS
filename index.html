@@ -291,10 +291,18 @@
       document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 見積結果のコピー機能
+    // 見積結果のコピー機能（各項目を「項目: 結果」1行に結合）
     function copyResult() {
-      const text = document.getElementById("resultContent").innerText;
-      navigator.clipboard.writeText(text)
+      const rows = document.querySelectorAll("#resultContent .result-row");
+      let copyText = "";
+      rows.forEach(row => {
+        const label = row.querySelector(".result-label").innerText.trim();
+        const value = row.querySelector(".result-value").innerText.trim();
+        // 1行に結合：スペースで区切る
+        copyText += `${label} ${value}    `;
+      });
+      copyText = copyText.trim();
+      navigator.clipboard.writeText(copyText)
         .then(() => {
           alert("見積結果をコピーしました！");
         })
