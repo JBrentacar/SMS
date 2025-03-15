@@ -49,8 +49,7 @@
       margin-bottom: 5px;
     }
     input[type="date"],
-    input[type="number"],
-    select {
+    input[type="number"] {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
@@ -74,6 +73,38 @@
     button:hover {
       background-color: #0051b5;
     }
+    .copy-btn {
+      background-color: #ffc600;
+      color: #333;
+      margin-top: 15px;
+    }
+    /* 車両クラス選択ボタン */
+    .car-class-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .car-class-btn {
+      flex: 1;
+      padding: 10px;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .car-class-btn.active {
+      background-color: #0068e9;
+      color: #fff;
+      border-color: #0068e9;
+    }
+    .error-message {
+      color: red;
+      display: none;
+      font-size: 14px;
+      margin-top: 5px;
+    }
     .result-row {
       display: flex;
       justify-content: space-between;
@@ -93,11 +124,6 @@
       padding-top: 10px;
       margin-top: 10px;
     }
-    .copy-btn {
-      background-color: #ffc600;
-      color: #333;
-      margin-top: 15px;
-    }
   </style>
 </head>
 <body>
@@ -110,23 +136,22 @@
         <div class="form-group">
           <label for="startDate">ご利用開始日 <span style="color: red;">*</span></label>
           <input type="date" id="startDate" required>
-          <div id="startDateError" style="color: red; display: none;">利用開始日を選択してください</div>
+          <div id="startDateError" class="error-message">利用開始日を選択してください</div>
         </div>
         <div class="form-group">
           <label for="days">ご利用日数 <span style="color: red;">*</span></label>
           <input type="number" id="days" min="1" max="365" value="30" step="1">
-          <div id="daysError" style="color: red; display: none;">利用日数は1日以上で入力してください</div>
+          <div id="daysError" class="error-message">利用日数は1日以上で入力してください</div>
         </div>
         <div class="form-group">
-          <label for="carClass">車両クラス <span style="color: red;">*</span></label>
-          <select id="carClass" required>
-            <option value="">選択してください</option>
-            <option value="J-1">J-1：軽自動車（2ドア）</option>
-            <option value="J-2">J-2：軽自動車（4ドア）</option>
-            <option value="J-3">J-3：軽貨物バン</option>
-            <option value="J-4">J-4：小型乗用車</option>
-          </select>
-          <div id="carClassError" style="color: red; display: none;">車両クラスを選択してください</div>
+          <label>車両クラス <span style="color: red;">*</span></label>
+          <div class="car-class-container" id="carClassContainer">
+            <div class="car-class-btn" data-value="J-1">J-1</div>
+            <div class="car-class-btn" data-value="J-2">J-2</div>
+            <div class="car-class-btn" data-value="J-3">J-3</div>
+            <div class="car-class-btn" data-value="J-4">J-4</div>
+          </div>
+          <div id="carClassError" class="error-message">車両クラスを選択してください</div>
         </div>
 
         <div class="section-title">オプション</div>
@@ -163,6 +188,23 @@
   </div>
 
   <script>
+    // 選択された車両クラスを格納する変数
+    let selectedCarClass = "";
+
+    // 車両クラス選択ボタンの動作設定
+    document.querySelectorAll(".car-class-btn").forEach(btn => {
+      btn.addEventListener("click", function() {
+        // 全てのボタンからactiveクラスを削除
+        document.querySelectorAll(".car-class-btn").forEach(b => b.classList.remove("active"));
+        // クリックされたボタンにactiveクラスを付与
+        this.classList.add("active");
+        // 選択された値を格納
+        selectedCarClass = this.getAttribute("data-value");
+        // エラー表示を消す
+        document.getElementById("carClassError").style.display = "none";
+      });
+    });
+
     // 料金表（各クラス、オプションは30日分までの料金。実際は日割計算）
     const rateTable = {
       "J-1": [1980, 3960, 5940, 7700, 7700, 7700, 7700, 9680, 11660, 13640, 15400, 15400, 15400, 15400, 17380, 19360, 21340, 23100, 23100, 23100, 23100, 23940, 23940, 23940, 23940, 23940, 23940, 23940, 23940, 23940],
@@ -185,9 +227,6 @@
       document.getElementById("days").addEventListener("input", function() {
         document.getElementById("daysError").style.display = "none";
       });
-      document.getElementById("carClass").addEventListener("change", function() {
-        document.getElementById("carClassError").style.display = "none";
-      });
     });
 
     // 入力チェック
@@ -195,7 +234,6 @@
       let valid = true;
       const startDate = document.getElementById("startDate").value;
       const days = parseInt(document.getElementById("days").value);
-      const carClass = document.getElementById("carClass").value;
       if (!startDate) {
         document.getElementById("startDateError").style.display = "block";
         valid = false;
@@ -204,7 +242,7 @@
         document.getElementById("daysError").style.display = "block";
         valid = false;
       }
-      if (!carClass) {
+      if (!selectedCarClass) {
         document.getElementById("carClassError").style.display = "block";
         valid = false;
       }
@@ -216,7 +254,6 @@
       if (!validateForm()) return;
       const startDate = document.getElementById("startDate").value;
       const days = parseInt(document.getElementById("days").value);
-      const carClass = document.getElementById("carClass").value;
       const insurance = document.getElementById("insurance").checked;
       const waiver = document.getElementById("waiver").checked;
       const tires = document.getElementById("tires").checked;
@@ -235,7 +272,7 @@
       while (remainingDays > 0) {
         const daysToCalc = Math.min(remainingDays, maxDaysPerRate);
         const rateIndex = Math.min(daysToCalc - 1, 29);
-        totalBaseRate += rateTable[carClass][rateIndex] || 0;
+        totalBaseRate += rateTable[selectedCarClass][rateIndex] || 0;
         if (insurance) {
           insuranceCost += rateTable.INS_WAIVER[rateIndex] || 0;
         }
@@ -274,7 +311,7 @@
         <div class="result-row"><span class="result-label">ご利用開始日:</span><span class="result-value">${formatDate(startObj)}</span></div>
         <div class="result-row"><span class="result-label">ご返却日:</span><span class="result-value">${formatDate(returnObj)}</span></div>
         <div class="result-row"><span class="result-label">ご利用日数:</span><span class="result-value">${days}日間</span></div>
-        <div class="result-row"><span class="result-label">クラス:</span><span class="result-value">${document.getElementById("carClass").options[document.getElementById("carClass").selectedIndex].text}</span></div>
+        <div class="result-row"><span class="result-label">クラス:</span><span class="result-value">${selectedCarClass}</span></div>
         <div class="result-row"><span class="result-label">基本料金:</span><span class="result-value">¥${totalBaseRate.toLocaleString()}</span></div>
         ${insurance ? `<div class="result-row"><span class="result-label">車両保険:</span><span class="result-value">¥${insuranceCost.toLocaleString()}</span></div>` : ''}
         ${waiver ? `<div class="result-row"><span class="result-label">免責補償:</span><span class="result-value">¥${waiverCost.toLocaleString()}</span></div>` : ''}
@@ -298,7 +335,6 @@
       rows.forEach(row => {
         const label = row.querySelector(".result-label").innerText.trim();
         const value = row.querySelector(".result-value").innerText.trim();
-        // 1行に結合：スペースで区切る
         copyText += `${label} ${value}    `;
       });
       copyText = copyText.trim();
