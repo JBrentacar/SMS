@@ -127,7 +127,8 @@
   </style>
 </head>
 <body>
-
+  <div class="container">
+    <h1>JBレンタカー 簡易見積もり</h1>
 
     <div class="card">
       <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
@@ -189,6 +190,22 @@
   </div>
 
   <script>
+    // グローバルな日付フォーマット関数（例: 2025年03月15日(土)）
+    function formatDateGlobal(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+      return `${y}年${m}月${d}日(${weekdays[date.getDay()]})`;
+    }
+    // フォーマット関数（YYYY-MM-DD）
+    function formatYYYYMMDD(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
     // 選択された車両クラスを格納する変数
     let selectedCarClass = "";
     // 最新の見積結果を保存するオブジェクト
@@ -297,17 +314,12 @@
       const startObj = new Date(startDate);
       const returnObj = new Date(startObj);
       returnObj.setDate(startObj.getDate() + days);
-      const formatDate = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-        return `${y}年${m}月${d}日(${weekdays[date.getDay()]})`;
-      };
+      const formattedStart = formatDateGlobal(startObj);
+      const formattedReturn = formatDateGlobal(returnObj);
 
       const resultHTML = `
-        <div class="result-row"><span class="result-label">ご利用開始日:</span><span class="result-value">${formatDate(startObj)}</span></div>
-        <div class="result-row"><span class="result-label">ご返却日:</span><span class="result-value">${formatDate(returnObj)}</span></div>
+        <div class="result-row"><span class="result-label">ご利用開始日:</span><span class="result-value">${formattedStart}</span></div>
+        <div class="result-row"><span class="result-label">ご返却日:</span><span class="result-value">${formattedReturn}</span></div>
         <div class="result-row"><span class="result-label">ご利用日数:</span><span class="result-value">${days}日間</span></div>
         <div class="result-row"><span class="result-label">クラス:</span><span class="result-value">${selectedCarClass}</span></div>
         <div class="result-row"><span class="result-label">基本料金:</span><span class="result-value">¥${totalBaseRate.toLocaleString()}</span></div>
@@ -328,7 +340,7 @@
       // 最新見積情報をグローバル変数に保存
       lastEstimate = {
         startObj: startObj,
-        returnDate: formatDate(returnObj),
+        returnDate: formattedReturn,
         days: days,
         carClass: selectedCarClass,
         basic: totalBaseRate,
@@ -340,7 +352,7 @@
         subtotal: subtotal,
         tax: tax,
         total: total,
-        startDateStr: formatDate(startObj)
+        startDateStr: formattedStart
       };
     }
 
@@ -363,25 +375,36 @@
         });
     }
 
+    // お振込期日を計算する関数
+    async function getValidPaymentDate(baseDate) {
+      let date = new Date(baseDate);
+      // 初期は前日
+      date.setDate(date.getDate() - 1);
+      let holidayData = {};
+      try {
+        const res = await fetch("https://holidays-jp.github.io/api/v1/date.json");
+        holidayData = await res.json();
+      } catch (e) {
+        console.error("祝日APIの取得に失敗しました:", e);
+        // APIエラーの場合は土日チェックのみ
+      }
+      // 週末または祝日ならさらに前日にする
+      while (date.getDay() === 0 || date.getDay() === 6 || holidayData[formatYYYYMMDD(date)]) {
+        date.setDate(date.getDate() - 1);
+      }
+      return date;
+    }
+
     // 延長案内のコピー機能
-    function copyExtensionNotice() {
+    async function copyExtensionNotice() {
       if (!lastEstimate) {
         alert("まず見積もりを計算してください。");
         return;
       }
-      // お振込期日は、ご利用開始日の前日として計算（※シンプルな例）
-      const paymentDateObj = new Date(lastEstimate.startObj);
-      paymentDateObj.setDate(paymentDateObj.getDate() - 1);
-      const formatDate = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-        return `${y}年${m}月${d}日(${weekdays[date.getDay()]})`;
-      };
-      const paymentDateStr = formatDate(paymentDateObj);
+      const paymentDateObj = await getValidPaymentDate(lastEstimate.startObj);
+      const paymentDateStr = formatDateGlobal(paymentDateObj);
       
-      // 延長案内テキスト（＊部分は変数として置換）
+      // 延長案内テキスト（＊部分は変数で置換）
       const extensionText = 
 `お世話になっております。 
 JBレンタカー石巻店です。
