@@ -124,6 +124,17 @@
       padding-top: 10px;
       margin-top: 10px;
     }
+    /* 延長案内出力用テキストエリア */
+    #extensionOutput {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -184,8 +195,10 @@
       <div class="section-title">お見積もり結果</div>
       <div id="resultContent"></div>
       <button class="copy-btn" onclick="copyResult()">結果をコピーする</button>
-      <!-- 延長案内のコピー用ボタン -->
-      <button class="copy-btn" onclick="copyExtensionNotice()">延長案内をコピーする</button>
+      <!-- 延長案内の出力 -->
+      <div class="section-title">延長案内</div>
+      <textarea id="extensionOutput" readonly></textarea>
+      <button class="copy-btn" onclick="copyExtensionText()">延長案内をコピーする</button>
     </div>
   </div>
 
@@ -354,92 +367,8 @@
         total: total,
         startDateStr: formattedStart
       };
-    }
 
-    // コピー処理：Clipboard API か execCommand のフォールバック
-    function copyTextToClipboard(text) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        return navigator.clipboard.writeText(text);
-      } else {
-        // フォールバック処理
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        // 画面外に配置
-        textarea.style.position = "fixed";
-        textarea.style.top = "-9999px";
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-          const successful = document.execCommand('copy');
-          document.body.removeChild(textarea);
-          if (!successful) {
-            return Promise.reject(new Error("execCommandが失敗しました"));
-          }
-          return Promise.resolve();
-        } catch (err) {
-          document.body.removeChild(textarea);
-          return Promise.reject(err);
-        }
-      }
-    }
-
-    // 見積結果のコピー機能（各項目を「項目: 結果」改行区切りで結合）
-    function copyResult() {
-      const rows = document.querySelectorAll("#resultContent .result-row");
-      let copyText = "";
-      rows.forEach(row => {
-        const label = row.querySelector(".result-label").innerText.trim();
-        const value = row.querySelector(".result-value").innerText.trim();
-        copyText += `${label} ${value}\n`;
-      });
-      copyText = copyText.trim();
-      copyTextToClipboard(copyText)
-        .then(() => {
-          alert("見積結果をコピーしました！");
-        })
-        .catch((err) => {
-          console.error(err);
-          alert("コピーに失敗しました。ブラウザの設定を確認してください。");
-        });
-    }
-
-    // お振込期日を計算する関数
-    async function getValidPaymentDate(baseDate) {
-      let date = new Date(baseDate);
-      // 初期は前日
-      date.setDate(date.getDate() - 1);
-      let holidayData = {};
-      try {
-        const res = await fetch("https://holidays-jp.github.io/api/v1/date.json");
-        holidayData = await res.json();
-      } catch (e) {
-        console.error("祝日APIの取得に失敗しました:", e);
-        // APIエラーの場合は土日チェックのみ
-      }
-      // 週末または祝日ならさらに前日にする
-      while (date.getDay() === 0 || date.getDay() === 6 || holidayData[formatYYYYMMDD(date)]) {
-        date.setDate(date.getDate() - 1);
-      }
-      return date;
-    }
-
-    // 延長案内のコピー機能
-    async function copyExtensionNotice() {
-      if (!lastEstimate) {
-        alert("まず見積もりを計算してください。");
-        return;
-      }
-      let paymentDateObj;
-      try {
-        paymentDateObj = await getValidPaymentDate(lastEstimate.startObj);
-      } catch (e) {
-        console.error(e);
-        paymentDateObj = new Date(lastEstimate.startObj);
-        paymentDateObj.setDate(paymentDateObj.getDate() - 1);
-      }
-      const paymentDateStr = formatDateGlobal(paymentDateObj);
-      
-      // 延長案内テキスト（選択したオプションのみ表示）
+      // 延長案内テキストの作成（未選択のオプションは表示しない）
       let extensionText = 
 `お世話になっております。 
 JBレンタカー石巻店です。
@@ -479,16 +408,91 @@ ${lastEstimate.startDateStr}でレンタカー契約が満了いたします。
 七十七銀行新中里支店
 普通口座 5023291 
 株式会社NIKKEN
+`;
+      // お振込期日の計算
+      getValidPaymentDate(lastEstimate.startObj)
+        .then(paymentDateObj => {
+          const paymentDateStr = formatDateGlobal(paymentDateObj);
+          extensionText += `\nお振込期日: ${paymentDateStr}\n\n以上、ご確認の上、ご連絡をお待ちしております。`;
+          // 延長案内テキストをテキストエリアに出力
+          document.getElementById("extensionOutput").value = extensionText;
+        })
+        .catch(err => {
+          console.error(err);
+          alert("お振込期日の計算に失敗しました。");
+        });
+    }
 
-お振込期日: ${paymentDateStr}
+    // コピー処理：Clipboard API を優先し execCommand のフォールバック
+    function copyTextToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textarea);
+          if (!successful) {
+            return Promise.reject(new Error("execCommandが失敗しました"));
+          }
+          return Promise.resolve();
+        } catch (err) {
+          document.body.removeChild(textarea);
+          return Promise.reject(err);
+        }
+      }
+    }
 
-以上、ご確認の上、ご連絡をお待ちしております。`;
-      
+    // 見積結果のコピー機能
+    function copyResult() {
+      const rows = document.querySelectorAll("#resultContent .result-row");
+      let copyText = "";
+      rows.forEach(row => {
+        const label = row.querySelector(".result-label").innerText.trim();
+        const value = row.querySelector(".result-value").innerText.trim();
+        copyText += `${label} ${value}\n`;
+      });
+      copyText = copyText.trim();
+      copyTextToClipboard(copyText)
+        .then(() => {
+          alert("見積結果をコピーしました！");
+        })
+        .catch(err => {
+          console.error(err);
+          alert("コピーに失敗しました。ブラウザの設定を確認してください。");
+        });
+    }
+
+    // お振込期日を計算する関数
+    async function getValidPaymentDate(baseDate) {
+      let date = new Date(baseDate);
+      date.setDate(date.getDate() - 1);
+      let holidayData = {};
+      try {
+        const res = await fetch("https://holidays-jp.github.io/api/v1/date.json");
+        holidayData = await res.json();
+      } catch (e) {
+        console.error("祝日APIの取得に失敗しました:", e);
+      }
+      while (date.getDay() === 0 || date.getDay() === 6 || holidayData[formatYYYYMMDD(date)]) {
+        date.setDate(date.getDate() - 1);
+      }
+      return date;
+    }
+
+    // 延長案内のコピー機能：出力済みのテキストエリアの内容をコピー
+    function copyExtensionText() {
+      const extensionText = document.getElementById("extensionOutput").value;
       copyTextToClipboard(extensionText)
         .then(() => {
           alert("延長案内の内容をコピーしました！");
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err);
           alert("コピーに失敗しました。ブラウザの設定を確認してください。");
         });
