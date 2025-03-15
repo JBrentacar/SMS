@@ -274,7 +274,7 @@
         <div class="result-row"><span class="result-label">ご利用開始日:</span><span class="result-value">${formatDate(startObj)}</span></div>
         <div class="result-row"><span class="result-label">ご返却日:</span><span class="result-value">${formatDate(returnObj)}</span></div>
         <div class="result-row"><span class="result-label">ご利用日数:</span><span class="result-value">${days}日間</span></div>
-        <div class="result-row"><span class="result-label">選択車両:</span><span class="result-value">${document.getElementById("carClass").options[document.getElementById("carClass").selectedIndex].text}</span></div>
+        <div class="result-row"><span class="result-label">クラス:</span><span class="result-value">${document.getElementById("carClass").options[document.getElementById("carClass").selectedIndex].text}</span></div>
         <div class="result-row"><span class="result-label">基本料金:</span><span class="result-value">¥${totalBaseRate.toLocaleString()}</span></div>
         ${insurance ? `<div class="result-row"><span class="result-label">車両保険:</span><span class="result-value">¥${insuranceCost.toLocaleString()}</span></div>` : ''}
         ${waiver ? `<div class="result-row"><span class="result-label">免責補償:</span><span class="result-value">¥${waiverCost.toLocaleString()}</span></div>` : ''}
