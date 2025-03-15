@@ -124,16 +124,11 @@
       padding-top: 10px;
       margin-top: 10px;
     }
-    /* hidden textarea for copy fallback */
-    #hiddenCopyTextArea {
-      position: absolute;
-      left: -9999px;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>JBレンタカー 簡易見積もり</h1>
+ 
 
     <div class="card">
       <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
@@ -193,9 +188,6 @@
       <button class="copy-btn" onclick="copyExtensionNotice()">延長案内をコピーする</button>
     </div>
   </div>
-
-  <!-- hidden textarea for fallback copy -->
-  <textarea id="hiddenCopyTextArea" readonly></textarea>
 
   <script>
     // グローバルな日付フォーマット関数（例: 2025年03月15日(土)）
@@ -364,29 +356,34 @@
       };
     }
 
-    // コピー処理の汎用関数（Clipboard API利用、なければ execCommandを利用）
-    function copyToClipboard(text) {
-      if (navigator.clipboard && window.isSecureContext) {
-        // Clipboard API が利用可能な場合
+    // コピー処理：Clipboard API か execCommand のフォールバック
+    function copyTextToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
         return navigator.clipboard.writeText(text);
       } else {
-        // Clipboard APIが利用できない場合、古いexecCommandを使用する
-        const textArea = document.getElementById("hiddenCopyTextArea");
-        textArea.value = text;
-        textArea.style.display = "block";
-        textArea.select();
+        // フォールバック処理
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        // 画面外に配置
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
         try {
-          document.execCommand("copy");
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textarea);
+          if (!successful) {
+            return Promise.reject(new Error("execCommandが失敗しました"));
+          }
+          return Promise.resolve();
         } catch (err) {
-          console.error("execCommand エラー:", err);
+          document.body.removeChild(textarea);
           return Promise.reject(err);
         }
-        textArea.style.display = "none";
-        return Promise.resolve();
       }
     }
 
-    // 見積結果のコピー機能
+    // 見積結果のコピー機能（各項目を「項目: 結果」改行区切りで結合）
     function copyResult() {
       const rows = document.querySelectorAll("#resultContent .result-row");
       let copyText = "";
@@ -396,13 +393,13 @@
         copyText += `${label} ${value}\n`;
       });
       copyText = copyText.trim();
-      copyToClipboard(copyText)
+      copyTextToClipboard(copyText)
         .then(() => {
           alert("見積結果をコピーしました！");
         })
         .catch((err) => {
           console.error(err);
-          alert("コピーに失敗しました。");
+          alert("コピーに失敗しました。ブラウザの設定を確認してください。");
         });
     }
 
@@ -432,7 +429,14 @@
         alert("まず見積もりを計算してください。");
         return;
       }
-      const paymentDateObj = await getValidPaymentDate(lastEstimate.startObj);
+      let paymentDateObj;
+      try {
+        paymentDateObj = await getValidPaymentDate(lastEstimate.startObj);
+      } catch (e) {
+        console.error(e);
+        paymentDateObj = new Date(lastEstimate.startObj);
+        paymentDateObj.setDate(paymentDateObj.getDate() - 1);
+      }
       const paymentDateStr = formatDateGlobal(paymentDateObj);
       
       // 延長案内テキスト（選択したオプションのみ表示）
@@ -480,13 +484,13 @@ ${lastEstimate.startDateStr}でレンタカー契約が満了いたします。
 
 以上、ご確認の上、ご連絡をお待ちしております。`;
       
-      copyToClipboard(extensionText)
+      copyTextToClipboard(extensionText)
         .then(() => {
           alert("延長案内の内容をコピーしました！");
         })
         .catch((err) => {
           console.error(err);
-          alert("コピーに失敗しました。");
+          alert("コピーに失敗しました。ブラウザの設定を確認してください。");
         });
     }
   </script>
