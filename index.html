@@ -127,7 +127,8 @@
   </style>
 </head>
 <body>
- 
+  <div class="container">
+    <h1>JBレンタカー 簡易見積もり</h1>
 
     <div class="card">
       <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
@@ -327,14 +328,14 @@
       document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 見積結果のコピー機能（各項目を「項目: 結果」1行に結合）
+    // 見積結果のコピー機能（各項目を「項目: 結果」改行区切りで結合）
     function copyResult() {
       const rows = document.querySelectorAll("#resultContent .result-row");
       let copyText = "";
       rows.forEach(row => {
         const label = row.querySelector(".result-label").innerText.trim();
         const value = row.querySelector(".result-value").innerText.trim();
-        copyText += `${label} ${value}    `;
+        copyText += `${label} ${value}\n`;
       });
       copyText = copyText.trim();
       navigator.clipboard.writeText(copyText)
