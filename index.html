@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JBレンタカー - 簡易見積もり</title>
+  <style>
+    /* 全体の設定 */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    h1 {
+      background-color: #0068e9;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .card {
+      background-color: #fff;
+      border: 1px solid #eaeaea;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .section-title {
+      font-size: 18px;
+      color: #0068e9;
+      border-bottom: 2px solid #ffc600;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input[type="date"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0068e9;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0051b5;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .result-label {
+      font-weight: normal;
+    }
+    .result-value {
+      font-weight: bold;
+      color: #0068e9;
+    }
+    .total-row {
+      font-size: 20px;
+      font-weight: bold;
+      border-top: 2px solid #0068e9;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+    .copy-btn {
+      background-color: #ffc600;
+      color: #333;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>JBレンタカー 簡易見積もり</h1>
+
+    <div class="card">
+      <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
+        <div class="section-title">基本情報</div>
+        <div class="form-group">
+          <label for="startDate">ご利用開始日 <span style="color: red;">*</span></label>
+          <input type="date" id="startDate" required>
+          <div id="startDateError" style="color: red; display: none;">利用開始日を選択してください</div>
+        </div>
+        <div class="form-group">
+          <label for="days">ご利用日数 <span style="color: red;">*</span></label>
+          <input type="number" id="days" min="1" max="365" value="7" step="1">
+          <div id="daysError" style="color: red; display: none;">利用日数は1日以上で入力してください</div>
+        </div>
+        <div class="form-group">
+          <label for="carClass">車両クラス <span style="color: red;">*</span></label>
+          <select id="carClass" required>
+            <option value="">選択してください</option>
+            <option value="J-1">J-1：軽自動車（2ドア）</option>
+            <option value="J-2">J-2：軽自動車（4ドア）</option>
+            <option value="J-3">J-3：軽貨物バン</option>
+            <option value="J-4">J-4：小型乗用車</option>
+          </select>
+          <div id="carClassError" style="color: red; display: none;">車両クラスを選択してください</div>
+        </div>
+
+        <div class="section-title">オプション</div>
+        <div class="form-group">
+          <input type="checkbox" id="insurance">
+          <label for="insurance" style="display:inline;">車両保険</label>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="waiver">
+          <label for="waiver" style="display:inline;">免責補償</label>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="tires">
+          <label for="tires" style="display:inline;">スタッドレスタイヤ</label>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="etc">
+          <label for="etc" style="display:inline;">ETC</label>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="gps">
+          <label for="gps" style="display:inline;">カーナビ</label>
+        </div>
+
+        <button type="submit">見積もりを計算する</button>
+      </form>
+    </div>
+
+    <div id="result" class="card" style="display:none;">
+      <div class="section-title">お見積もり結果</div>
+      <div id="resultContent"></div>
+      <button class="copy-btn" onclick="copyResult()">結果をコピーする</button>
+    </div>
+  </div>
+
+  <script>
+    // 料金表（各クラス、オプションは30日分までの料金。実際は日割計算）
+    const rateTable = {
+      "J-1": [1980, 3960, 5940, 7700, 7700, 7700, 7700, 9680, 11660, 13640, 15400, 15400, 15400, 15400, 17380, 19360, 21340, 23100, 23100, 23100, 23100, 23940, 23940, 23940, 23940, 23940, 23940, 23940, 23940, 23940],
+      "J-2": [2480, 4960, 7440, 9600, 9600, 9600, 9600, 12080, 14560, 17040, 19200, 19200, 19200, 19200, 21680, 24160, 26640, 28800, 28800, 28800, 28800, 29580, 29580, 29580, 29580, 29580, 29580, 29580, 29580, 29580],
+      "J-3": [3180, 6360, 9540, 12720, 13400, 13400, 13400, 16580, 19760, 22940, 26120, 26800, 26800, 26800, 29980, 33160, 36340, 39500, 39500, 39500, 39500, 39500, 39500, 39500, 39500, 39500, 39500, 39500, 39500, 39500],
+      "J-4": [3380, 6760, 10140, 13520, 16900, 17480, 17480, 20860, 24240, 27620, 31000, 34380, 34960, 34960, 38340, 39800, 39800, 39800, 39800, 39800, 39800, 39800, 39800, 39800, 39800, 39800, 39800, 39800, 39800, 39800],
+      "ETC_NAV": [500, 1000, 1000, 1000, 1000, 1000, 1000, 1500, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000],
+      "INS_WAIVER": [1000, 2000, 2000, 2000, 2000, 2000, 2000, 3000, 4000, 4000, 4000, 4000, 4000, 4000, 5000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000],
+      "WINTER_TIRES": [1000, 2000, 3000, 3000, 3000, 3000, 3000, 4000, 5000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000]
+    };
+
+    // 初期設定：開始日に本日を設定
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("startDate").value = today;
+      // エラーメッセージの非表示設定
+      document.getElementById("startDate").addEventListener("input", function() {
+        document.getElementById("startDateError").style.display = "none";
+      });
+      document.getElementById("days").addEventListener("input", function() {
+        document.getElementById("daysError").style.display = "none";
+      });
+      document.getElementById("carClass").addEventListener("change", function() {
+        document.getElementById("carClassError").style.display = "none";
+      });
+    });
+
+    // 入力チェック
+    function validateForm() {
+      let valid = true;
+      const startDate = document.getElementById("startDate").value;
+      const days = parseInt(document.getElementById("days").value);
+      const carClass = document.getElementById("carClass").value;
+      if (!startDate) {
+        document.getElementById("startDateError").style.display = "block";
+        valid = false;
+      }
+      if (isNaN(days) || days < 1) {
+        document.getElementById("daysError").style.display = "block";
+        valid = false;
+      }
+      if (!carClass) {
+        document.getElementById("carClassError").style.display = "block";
+        valid = false;
+      }
+      return valid;
+    }
+
+    // 見積もり計算＆表示
+    function calculateAndShowResult() {
+      if (!validateForm()) return;
+      const startDate = document.getElementById("startDate").value;
+      const days = parseInt(document.getElementById("days").value);
+      const carClass = document.getElementById("carClass").value;
+      const insurance = document.getElementById("insurance").checked;
+      const waiver = document.getElementById("waiver").checked;
+      const tires = document.getElementById("tires").checked;
+      const etc = document.getElementById("etc").checked;
+      const gps = document.getElementById("gps").checked;
+
+      let totalBaseRate = 0;
+      let insuranceCost = 0;
+      let waiverCost = 0;
+      let tiresCost = 0;
+      let etcCost = 0;
+      let gpsCost = 0;
+      let remainingDays = days;
+      const maxDaysPerRate = 30;
+
+      while (remainingDays > 0) {
+        const daysToCalc = Math.min(remainingDays, maxDaysPerRate);
+        const rateIndex = Math.min(daysToCalc - 1, 29);
+        totalBaseRate += rateTable[carClass][rateIndex] || 0;
+        if (insurance) {
+          insuranceCost += rateTable.INS_WAIVER[rateIndex] || 0;
+        }
+        if (waiver) {
+          waiverCost += rateTable.INS_WAIVER[rateIndex] || 0;
+        }
+        if (tires) {
+          tiresCost += rateTable.WINTER_TIRES[rateIndex] || 0;
+        }
+        if (etc) {
+          etcCost += rateTable.ETC_NAV[rateIndex] || 0;
+        }
+        if (gps) {
+          gpsCost += rateTable.ETC_NAV[rateIndex] || 0;
+        }
+        remainingDays -= daysToCalc;
+      }
+
+      const subtotal = totalBaseRate + insuranceCost + waiverCost + tiresCost + etcCost + gpsCost;
+      const tax = Math.round(subtotal * 0.1);
+      const total = subtotal + tax;
+
+      // 日付計算
+      const startObj = new Date(startDate);
+      const returnObj = new Date(startObj);
+      returnObj.setDate(startObj.getDate() + days);
+      const formatDate = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+        return `${y}年${m}月${d}日(${weekdays[date.getDay()]})`;
+      };
+
+      const resultHTML = `
+        <div class="result-row"><span class="result-label">ご利用開始日:</span><span class="result-value">${formatDate(startObj)}</span></div>
+        <div class="result-row"><span class="result-label">ご返却日:</span><span class="result-value">${formatDate(returnObj)}</span></div>
+        <div class="result-row"><span class="result-label">ご利用日数:</span><span class="result-value">${days}日間</span></div>
+        <div class="result-row"><span class="result-label">選択車両:</span><span class="result-value">${document.getElementById("carClass").options[document.getElementById("carClass").selectedIndex].text}</span></div>
+        <div class="result-row"><span class="result-label">基本料金:</span><span class="result-value">¥${totalBaseRate.toLocaleString()}</span></div>
+        ${insurance ? `<div class="result-row"><span class="result-label">車両保険:</span><span class="result-value">¥${insuranceCost.toLocaleString()}</span></div>` : ''}
+        ${waiver ? `<div class="result-row"><span class="result-label">免責補償:</span><span class="result-value">¥${waiverCost.toLocaleString()}</span></div>` : ''}
+        ${tires ? `<div class="result-row"><span class="result-label">スタッドレスタイヤ:</span><span class="result-value">¥${tiresCost.toLocaleString()}</span></div>` : ''}
+        ${etc ? `<div class="result-row"><span class="result-label">ETC:</span><span class="result-value">¥${etcCost.toLocaleString()}</span></div>` : ''}
+        ${gps ? `<div class="result-row"><span class="result-label">カーナビ:</span><span class="result-value">¥${gpsCost.toLocaleString()}</span></div>` : ''}
+        <div class="result-row"><span class="result-label">小計:</span><span class="result-value">¥${subtotal.toLocaleString()}</span></div>
+        <div class="result-row"><span class="result-label">消費税(10%):</span><span class="result-value">¥${tax.toLocaleString()}</span></div>
+        <div class="result-row total-row"><span class="result-label">合計金額:</span><span class="result-value">¥${total.toLocaleString()}</span></div>
+      `;
+
+      document.getElementById("resultContent").innerHTML = resultHTML;
+      document.getElementById("result").style.display = "block";
+      document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 見積結果のコピー機能
+    function copyResult() {
+      const text = document.getElementById("resultContent").innerText;
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          alert("見積結果をコピーしました！");
+        })
+        .catch(() => {
+          alert("コピーに失敗しました。ブラウザの設定を確認してください。");
+        });
+    }
+  </script>
+</body>
+</html>
