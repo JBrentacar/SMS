@@ -139,7 +139,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>JBレンタカー 簡易見積もり</h1>
+
 
     <div class="card">
       <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
@@ -154,6 +154,28 @@
           <input type="number" id="days" min="1" max="365" value="30" step="1">
           <div id="daysError" class="error-message">利用日数は1日以上で入力してください</div>
         </div>
+        <!-- スタッドレスタイヤ日数入力欄 -->
+        <div class="form-group">
+          <label for="tiresInputDays">スタッドレスタイヤ日数 <span style="color: red;">*</span></label>
+          <input type="number" id="tiresInputDays" min="1" max="365" value="30" step="1">
+          <div id="tiresInputDaysError" class="error-message">スタッドレスタイヤ日数は1日以上で入力してください</div>
+        </div>
+        <div class="form-group">
+          <label for="tiresStartDate">スタッドレスタイヤ開始日 <span style="color: red;">*</span></label>
+          <input type="date" id="tiresStartDate" required>
+          <div id="tiresStartDateError" class="error-message">スタッドレスタイヤ開始日を選択してください</div>
+        </div>
+        <div class="form-group">
+          <label for="tiresEndDate">スタッドレスタイヤ終了日 <span style="color: red;">*</span></label>
+          <!-- 終了日は自動計算のためreadonly -->
+          <input type="date" id="tiresEndDate" required readonly>
+          <div id="tiresEndDateError" class="error-message">スタッドレスタイヤ終了日を設定してください</div>
+        </div>
+        <!-- 計算結果表示 -->
+        <div class="form-group">
+          <span id="calculatedTiresDays"></span>
+        </div>
+
         <div class="form-group">
           <label>車両クラス <span style="color: red;">*</span></label>
           <div class="car-class-container" id="carClassContainer">
@@ -218,6 +240,25 @@
       const d = String(date.getDate()).padStart(2, '0');
       return `${y}-${m}-${d}`;
     }
+    // 月末日を求める関数
+    function getMonthEnd(date) {
+      return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    }
+    // スタッドレスタイヤ利用日数を計算して表示
+    function updateTiresCalculatedDays() {
+      const startVal = document.getElementById("tiresStartDate").value;
+      if (!startVal) return;
+      const startDate = new Date(startVal);
+      const endDate = getMonthEnd(startDate);
+      // 自動設定：終了日は開始日の月末
+      document.getElementById("tiresEndDate").value = formatYYYYMMDD(endDate);
+      // 計算：終了日 - 開始日 + 1
+      const diffTime = endDate.getTime() - startDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById("calculatedTiresDays").innerText = "計算されたスタッドレスタイヤ利用日数: " + diffDays + "日";
+      // オプションとして、入力欄（tiresInputDays）も自動更新する場合は以下の行のコメントを外す
+      // document.getElementById("tiresInputDays").value = diffDays;
+    }
 
     // 選択された車両クラスを格納する変数
     let selectedCarClass = "";
@@ -245,15 +286,28 @@
       "WINTER_TIRES": [1000, 2000, 3000, 3000, 3000, 3000, 3000, 4000, 5000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000]
     };
 
-    // 初期設定：開始日に本日を設定
+    // 初期設定：開始日に本日を設定し、スタッドレスタイヤ開始日も同日を初期値とする
     document.addEventListener('DOMContentLoaded', function() {
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("startDate").value = today;
+      document.getElementById("tiresStartDate").value = today;
+      updateTiresCalculatedDays();
+
       document.getElementById("startDate").addEventListener("input", function() {
         document.getElementById("startDateError").style.display = "none";
+        // ご利用開始日が変更された場合、スタッドレスタイヤ開始日も自動で更新（ユーザーが変更していなければ）
+        document.getElementById("tiresStartDate").value = this.value;
+        updateTiresCalculatedDays();
       });
       document.getElementById("days").addEventListener("input", function() {
         document.getElementById("daysError").style.display = "none";
+      });
+      document.getElementById("tiresInputDays").addEventListener("input", function() {
+        document.getElementById("tiresInputDaysError").style.display = "none";
+      });
+      document.getElementById("tiresStartDate").addEventListener("input", function() {
+        document.getElementById("tiresStartDateError").style.display = "none";
+        updateTiresCalculatedDays();
       });
     });
 
@@ -262,12 +316,22 @@
       let valid = true;
       const startDate = document.getElementById("startDate").value;
       const days = parseInt(document.getElementById("days").value);
+      const tiresInputDays = parseInt(document.getElementById("tiresInputDays").value);
+      const tiresStartDate = document.getElementById("tiresStartDate").value;
       if (!startDate) {
         document.getElementById("startDateError").style.display = "block";
         valid = false;
       }
       if (isNaN(days) || days < 1) {
         document.getElementById("daysError").style.display = "block";
+        valid = false;
+      }
+      if (isNaN(tiresInputDays) || tiresInputDays < 1) {
+        document.getElementById("tiresInputDaysError").style.display = "block";
+        valid = false;
+      }
+      if (!tiresStartDate) {
+        document.getElementById("tiresStartDateError").style.display = "block";
         valid = false;
       }
       if (!selectedCarClass) {
@@ -282,6 +346,7 @@
       if (!validateForm()) return;
       const startDate = document.getElementById("startDate").value;
       const days = parseInt(document.getElementById("days").value);
+      const tiresInputDays = parseInt(document.getElementById("tiresInputDays").value);
       const insurance = document.getElementById("insurance").checked;
       const waiver = document.getElementById("waiver").checked;
       const tires = document.getElementById("tires").checked;
@@ -297,6 +362,7 @@
       let remainingDays = days;
       const maxDaysPerRate = 30;
 
+      // 基本料金等（ご利用日数ベース）
       while (remainingDays > 0) {
         const daysToCalc = Math.min(remainingDays, maxDaysPerRate);
         const rateIndex = Math.min(daysToCalc - 1, 29);
@@ -307,9 +373,6 @@
         if (waiver) {
           waiverCost += rateTable.INS_WAIVER[rateIndex] || 0;
         }
-        if (tires) {
-          tiresCost += rateTable.WINTER_TIRES[rateIndex] || 0;
-        }
         if (etc) {
           etcCost += rateTable.ETC_NAV[rateIndex] || 0;
         }
@@ -317,6 +380,16 @@
           gpsCost += rateTable.ETC_NAV[rateIndex] || 0;
         }
         remainingDays -= daysToCalc;
+      }
+      // スタッドレスタイヤ料金は、入力された「スタッドレスタイヤ日数」をもとに計算
+      if (tires) {
+        let remainingTiresDays = tiresInputDays;
+        while (remainingTiresDays > 0) {
+          const daysToCalc = Math.min(remainingTiresDays, maxDaysPerRate);
+          const rateIndex = Math.min(daysToCalc - 1, 29);
+          tiresCost += rateTable.WINTER_TIRES[rateIndex] || 0;
+          remainingTiresDays -= daysToCalc;
+        }
       }
 
       const subtotal = totalBaseRate + insuranceCost + waiverCost + tiresCost + etcCost + gpsCost;
