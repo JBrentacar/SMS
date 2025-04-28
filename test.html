@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>簡易見積もり</title>
+  <style>
+    /* 全体の設定 */
+    body { font-family: Arial, sans-serif; background-color: #f9f9f9; color: #333; margin: 0; padding: 20px; box-sizing: border-box; }
+    .container { max-width: 500px; margin: 0 auto; }
+    h1 { background-color: #0068e9; color: #fff; padding: 12px 20px; border-radius: 8px; text-align: center; }
+    .card { background-color: #fff; border: 1px solid #eaeaea; border-radius: 8px; padding: 20px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .section-title { font-size: 18px; color: #0068e9; border-bottom: 2px solid #ffc600; padding-bottom: 8px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; }
+    input[type="text"], input[type="date"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    input[type="checkbox"] { margin-right: 5px; }
+    button { width: 100%; padding: 12px; background-color: #0068e9; color: #fff; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    button:hover { background-color: #0051b5; }
+    .copy-btn { background-color: #ffc600; color: #333; margin-top: 15px; }
+    .car-class-container, .user-container { display: flex; flex-wrap: wrap; gap: 10px; }
+    .car-class-btn, .user-btn { position: relative; flex: 1 1 100px; padding: 10px; background-color: #eee; border: 1px solid #ccc; border-radius: 4px; text-align: center; cursor: pointer; font-size: 16px; }
+    .car-class-btn.active, .user-btn.active { background-color: #0068e9; color: #fff; border-color: #0068e9; }
+    .remove-user { position: absolute; top: 2px; right: 4px; color: #d9534f; font-weight: bold; cursor: pointer; }
+    .error-message { color: red; display: none; font-size: 14px; margin-top: 5px; }
+    .result-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .result-label { font-weight: normal; }
+    .result-value { font-weight: bold; color: #0068e9; }
+    .total-row { font-size: 20px; font-weight: bold; border-top: 2px solid #0068e9; padding-top: 10px; margin-top: 10px; }
+    #extensionOutput { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>簡易見積もり</h1>
+    <div class="card">
+      <!-- お客様管理 -->
+      <div class="section-title">お客様管理</div>
+      <div class="form-group">
+        <input type="text" id="newUserName" placeholder="名前を入力">
+        <button id="addUserBtn" type="button">追加</button>
+      </div>
+      <div class="form-group user-container" id="userContainer"></div>
+      <!-- フォーム -->
+      <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
+        <div class="section-title">選択項目</div>
+        <div class="form-group">
+          <label>車両クラス <span style="color: red;">*</span></label>
+          <div class="car-class-container" id="carClassContainer">
+            <div class="car-class-btn" data-value="J-1">J-1</div>
+            <div class="car-class-btn" data-value="J-2">J-2</div>
+            <div class="car-class-btn" data-value="J-3">J-3</div>
+            <div class="car-class-btn" data-value="J-4">J-4</div>
+          </div>
+          <div id="carClassError" class="error-message">車両クラスを選択してください</div>
+        </div>
+        <div class="form-group"><input type="checkbox" id="insurance"><label for="insurance">車両保険</label></div>
+        <div class="form-group"><input type="checkbox" id="waiver"><label for="waiver">免責補償</label></div>
+        <div class="form-group"><input type="checkbox" id="tires"><label for="tires">スタッドレスタイヤ</label></div>
+        <div class="form-group"><input type="checkbox" id="etc"><label for="etc">ETC</label></div>
+        <div class="form-group"><input type="checkbox" id="gps"><label for="gps">カーナビ</label></div>
+
+        <div class="section-title">基本情報</div>
+        <div class="form-group">
+          <label for="startDate">ご利用開始日 <span style="color: red;">*</span></label>
+          <input type="date" id="startDate" required>
+          <div id="startDateError" class="error-message">利用開始日を選択してください</div>
+        </div>
+        <div class="form-group">
+          <label for="days">ご利用日数 <span style="color: red;">*</span></label>
+          <input type="number" id="days" min="1" max="365" value="30">
+          <div id="daysError" class="error-message">利用日数は1日以上で入力してください</div>
+        </div>
+
+        <div id="tiresFields">
+          <div class="form-group">
+            <label for="tiresInputDays">スタッドレスタイヤ日数 <span style="color: red;">*</span></label>
+            <input type="number" id="tiresInputDays" min="1" max="365" value="30">
+            <div id="tiresInputDaysError" class="error-message">入力してください</div>
+          </div>
+          <div class="form-group">
+            <label for="tiresStartDate">スタッドタイヤ開始日 <span style="color: red;">*</span></label>
+            <input type="date" id="tiresStartDate" required>
+            <div id="tiresStartDateError" class="error-message">選択してください</div>
+          </div>
+          <div class="form-group">
+            <label for="tiresEndDate">スタッドタイヤ終了日</label>
+            <input type="date" id="tiresEndDate" readonly>
+            <div id="tiresEndDateError" class="error-message">自動設定されます</div>
+          </div>
+          <div class="form-group"><span id="calculatedTiresDays"></span></div>
+        </div>
+
+        <button type="submit">見積もりを計算</button>
+      </form>
+    </div>
+
+    <div id="result" class="card" style="display:none;">
+      <div class="section-title">結果</div>
+      <div id="resultContent"></div>
+      <button class="copy-btn" onclick="copyResult()">コピー</button>
+      <div class="section-title">延長案内</div>
+      <textarea id="extensionOutput" readonly></textarea>
+      <button class="copy-btn" onclick="copyExtensionText()">コピー</button>
+    </div>
+  </div>
+
+<script>
+  // ユーザーリスト管理
+  let users = [];
+  let currentUser = null;
+  function renderUsers() {
+    const container = document.getElementById('userContainer');
+    container.innerHTML = '';
+    users.forEach(name => {
+      const btn = document.createElement('div');
+      btn.className = 'user-btn';
+      btn.textContent = name;
+      btn.dataset.user = name;
+      const rem = document.createElement('span');
+      rem.className = 'remove-user';
+      rem.textContent = '×';
+      btn.appendChild(rem);
+      container.appendChild(btn);
+      btn.addEventListener('click', e => {
+        if (e.target.classList.contains('remove-user')) {
+          removeUser(name);
+        } else {
+          selectUser(name);
+        }
+      });
+    });
+  }
+  function addUser() {
+    const input = document.getElementById('newUserName');
+    const name = input.value.trim();
+    if (!name) return;
+    if (users.includes(name)) { alert('既に存在します'); return; }
+    users.push(name);
+    localStorage.setItem('userList', JSON.stringify(users));
+    input.value = '';
+    renderUsers();
+  }
+  function removeUser(name) {
+    users = users.filter(u => u !== name);
+    localStorage.setItem('userList', JSON.stringify(users));
+    localStorage.removeItem(`estimate_${name}`);
+    if (currentUser === name) {
+      currentUser = null;
+      document.getElementById('result').style.display = 'none';
+    }
+    renderUsers();
+  }
+  function selectUser(name) {
+    currentUser = name;
+    document.querySelectorAll('.user-btn').forEach(b => b.classList.toggle('active', b.dataset.user === name));
+    loadUserEstimate(name);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('userList');
+    if (saved) users = JSON.parse(saved);
+    renderUsers();
+    document.getElementById('addUserBtn').addEventListener('click', addUser);
+    initForm();
+  });
+
+  function initForm() {
+    // フォーマット・計算ヘルパー
+    function formatDateGlobal(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'), w=['日','月','火','水','木','金','土'][d.getDay()]; return `${y}年${m}月${day}日(${w})`; }
+    function formatYYYYMMDD(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function getMonthEnd(d){ return new Date(d.getFullYear(), d.getMonth()+1,0); }
+    let selectedCarClass = '';
+    const rateTable = {
+      "J-1":[1980,3960,5940,7700,7700,7700,7700,9680,11660,13640,15400,15400,15400,15400,17380,19360,21340,23100,23100,23100,23100,23940,23940,23940,23940,23940,23940,23940,23940,23940],
+      "J-2":[2480,4960,7440,9600,9600,9600,9600,12080,14560,17040,19200,19200,19200,19200,21680,24160,26640,28800,28800,28800,28800,29580,29580,29580,29580,29580,29580,29580,29580,29580],
+      "J-3":[3180,6360,9540,12720,13400,13400,13400,16580,19760,22940,26120,26800,26800,26800,29980,33160,36340,39500,39500,39500,39500,39500,39500,39500,39500,39500,39500,39500,39500,39500],
+      "J-4":[3380,6760,10140,13520,16900,17480,17480,20860,24240,27620,31000,34380,34960,34960,38340,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800],
+      "ETC_NAV":[500,1000,1000,1000,1000,1000,1000,1500,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000],
+      "INS_WAIVER":[1000,2000,2000,2000,2000,2000,2000,3000,4000,4000,4000,4000,4000,4000,5000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000],
+      "WINTER_TIRES":[1000,2000,3000,3000,3000,3000,3000,4000,5000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000]
+    };
+    // 初期値
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').value = today;
+    document.getElementById('tiresStartDate').value = today;
+    toggleTiresFields(); updateTiresCalculatedDays();
+    document.getElementById('tires').addEventListener('change', toggleTiresFields);
+    document.querySelectorAll('.car-class-btn').forEach(btn => btn.addEventListener('click', ()=>{
