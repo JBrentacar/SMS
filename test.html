@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>簡易見積もり</title>
   <style>
-    /* 全体の設定 */
+    /* スタイルは省略せず同様に */
     body { font-family: Arial, sans-serif; background-color: #f9f9f9; color: #333; margin: 0; padding: 20px; box-sizing: border-box; }
     .container { max-width: 500px; margin: 0 auto; }
     h1 { background-color: #0068e9; color: #fff; padding: 12px 20px; border-radius: 8px; text-align: center; }
@@ -34,24 +34,17 @@
   <div class="container">
     <h1>簡易見積もり</h1>
     <div class="card">
-      <!-- お客様管理 -->
       <div class="section-title">お客様管理</div>
       <div class="form-group">
         <input type="text" id="newUserName" placeholder="名前を入力">
         <button id="addUserBtn" type="button">追加</button>
       </div>
       <div class="form-group user-container" id="userContainer"></div>
-      <!-- フォーム -->
-      <form id="rentalForm" onsubmit="event.preventDefault(); calculateAndShowResult();">
+      <form id="rentalForm">
         <div class="section-title">選択項目</div>
         <div class="form-group">
           <label>車両クラス <span style="color: red;">*</span></label>
-          <div class="car-class-container" id="carClassContainer">
-            <div class="car-class-btn" data-value="J-1">J-1</div>
-            <div class="car-class-btn" data-value="J-2">J-2</div>
-            <div class="car-class-btn" data-value="J-3">J-3</div>
-            <div class="car-class-btn" data-value="J-4">J-4</div>
-          </div>
+          <div class="car-class-container" id="carClassContainer"></div>
           <div id="carClassError" class="error-message">車両クラスを選択してください</div>
         </div>
         <div class="form-group"><input type="checkbox" id="insurance"><label for="insurance">車両保険</label></div>
@@ -59,131 +52,118 @@
         <div class="form-group"><input type="checkbox" id="tires"><label for="tires">スタッドレスタイヤ</label></div>
         <div class="form-group"><input type="checkbox" id="etc"><label for="etc">ETC</label></div>
         <div class="form-group"><input type="checkbox" id="gps"><label for="gps">カーナビ</label></div>
-
         <div class="section-title">基本情報</div>
-        <div class="form-group">
-          <label for="startDate">ご利用開始日 <span style="color: red;">*</span></label>
-          <input type="date" id="startDate" required>
-          <div id="startDateError" class="error-message">利用開始日を選択してください</div>
-        </div>
-        <div class="form-group">
-          <label for="days">ご利用日数 <span style="color: red;">*</span></label>
-          <input type="number" id="days" min="1" max="365" value="30">
-          <div id="daysError" class="error-message">利用日数は1日以上で入力してください</div>
-        </div>
-
+        <div class="form-group"><label for="startDate">ご利用開始日 <span style="color: red;">*</span></label><input type="date" id="startDate"><div id="startDateError" class="error-message">選択してください</div></div>
+        <div class="form-group"><label for="days">ご利用日数 <span style="color: red;">*</span></label><input type="number" id="days" min="1" max="365" value="30"><div id="daysError" class="error-message">1以上</div></div>
         <div id="tiresFields">
-          <div class="form-group">
-            <label for="tiresInputDays">スタッドレスタイヤ日数 <span style="color: red;">*</span></label>
-            <input type="number" id="tiresInputDays" min="1" max="365" value="30">
-            <div id="tiresInputDaysError" class="error-message">入力してください</div>
-          </div>
-          <div class="form-group">
-            <label for="tiresStartDate">スタッドタイヤ開始日 <span style="color: red;">*</span></label>
-            <input type="date" id="tiresStartDate" required>
-            <div id="tiresStartDateError" class="error-message">選択してください</div>
-          </div>
-          <div class="form-group">
-            <label for="tiresEndDate">スタッドタイヤ終了日</label>
-            <input type="date" id="tiresEndDate" readonly>
-            <div id="tiresEndDateError" class="error-message">自動設定されます</div>
-          </div>
+          <div class="form-group"><label for="tiresInputDays">スタッドレスタイヤ日数 <span style="color: red;">*</span></label><input type="number" id="tiresInputDays" min="1" value="30"><div id="tiresInputDaysError" class="error-message">入力してください</div></div>
+          <div class="form-group"><label for="tiresStartDate">スタッドタイヤ開始日 <span style="color: red;">*</span></label><input type="date" id="tiresStartDate"><div id="tiresStartDateError" class="error-message">選択してください</div></div>
+          <div class="form-group"><label for="tiresEndDate">スタッドタイヤ終了日</label><input type="date" id="tiresEndDate" readonly><div id="tiresEndDateError" class="error-message">自動設定</div></div>
           <div class="form-group"><span id="calculatedTiresDays"></span></div>
         </div>
-
-        <button type="submit">見積もりを計算</button>
+        <button type="button" id="calculateBtn">見積もりを計算</button>
       </form>
     </div>
-
     <div id="result" class="card" style="display:none;">
       <div class="section-title">結果</div>
       <div id="resultContent"></div>
-      <button class="copy-btn" onclick="copyResult()">コピー</button>
+      <button class="copy-btn" id="copyResultBtn">コピー</button>
       <div class="section-title">延長案内</div>
       <textarea id="extensionOutput" readonly></textarea>
-      <button class="copy-btn" onclick="copyExtensionText()">コピー</button>
+      <button class="copy-btn" id="copyExtensionBtn">コピー</button>
     </div>
   </div>
-
-<script>
-  // ユーザーリスト管理
-  let users = [];
-  let currentUser = null;
-  function renderUsers() {
-    const container = document.getElementById('userContainer');
-    container.innerHTML = '';
-    users.forEach(name => {
-      const btn = document.createElement('div');
-      btn.className = 'user-btn';
-      btn.textContent = name;
-      btn.dataset.user = name;
-      const rem = document.createElement('span');
-      rem.className = 'remove-user';
-      rem.textContent = '×';
-      btn.appendChild(rem);
-      container.appendChild(btn);
-      btn.addEventListener('click', e => {
-        if (e.target.classList.contains('remove-user')) {
-          removeUser(name);
-        } else {
-          selectUser(name);
-        }
-      });
-    });
-  }
-  function addUser() {
-    const input = document.getElementById('newUserName');
-    const name = input.value.trim();
-    if (!name) return;
-    if (users.includes(name)) { alert('既に存在します'); return; }
-    users.push(name);
-    localStorage.setItem('userList', JSON.stringify(users));
-    input.value = '';
-    renderUsers();
-  }
-  function removeUser(name) {
-    users = users.filter(u => u !== name);
-    localStorage.setItem('userList', JSON.stringify(users));
-    localStorage.removeItem(`estimate_${name}`);
-    if (currentUser === name) {
-      currentUser = null;
-      document.getElementById('result').style.display = 'none';
+  <script>
+    // helpers
+    function formatDateGlobal(d) {
+      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+      const w = ['日','月','火','水','木','金','土'][d.getDay()];
+      return `${y}年${m}月${day}日(${w})`;
     }
-    renderUsers();
-  }
-  function selectUser(name) {
-    currentUser = name;
-    document.querySelectorAll('.user-btn').forEach(b => b.classList.toggle('active', b.dataset.user === name));
-    loadUserEstimate(name);
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('userList');
-    if (saved) users = JSON.parse(saved);
-    renderUsers();
-    document.getElementById('addUserBtn').addEventListener('click', addUser);
-    initForm();
-  });
-
-  function initForm() {
-    // フォーマット・計算ヘルパー
-    function formatDateGlobal(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'), w=['日','月','火','水','木','金','土'][d.getDay()]; return `${y}年${m}月${day}日(${w})`; }
-    function formatYYYYMMDD(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-    function getMonthEnd(d){ return new Date(d.getFullYear(), d.getMonth()+1,0); }
+    function formatYYYYMMDD(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function getMonthEnd(d) {
+      return new Date(d.getFullYear(), d.getMonth()+1, 0);
+    }
+    // data
+    let users = [];
+    let currentUser = null;
     let selectedCarClass = '';
-    const rateTable = {
-      "J-1":[1980,3960,5940,7700,7700,7700,7700,9680,11660,13640,15400,15400,15400,15400,17380,19360,21340,23100,23100,23100,23100,23940,23940,23940,23940,23940,23940,23940,23940,23940],
-      "J-2":[2480,4960,7440,9600,9600,9600,9600,12080,14560,17040,19200,19200,19200,19200,21680,24160,26640,28800,28800,28800,28800,29580,29580,29580,29580,29580,29580,29580,29580,29580],
-      "J-3":[3180,6360,9540,12720,13400,13400,13400,16580,19760,22940,26120,26800,26800,26800,29980,33160,36340,39500,39500,39500,39500,39500,39500,39500,39500,39500,39500,39500,39500,39500],
-      "J-4":[3380,6760,10140,13520,16900,17480,17480,20860,24240,27620,31000,34380,34960,34960,38340,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800,39800],
-      "ETC_NAV":[500,1000,1000,1000,1000,1000,1000,1500,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000],
-      "INS_WAIVER":[1000,2000,2000,2000,2000,2000,2000,3000,4000,4000,4000,4000,4000,4000,5000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000],
-      "WINTER_TIRES":[1000,2000,3000,3000,3000,3000,3000,4000,5000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000,6000]
-    };
-    // 初期値
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('startDate').value = today;
-    document.getElementById('tiresStartDate').value = today;
-    toggleTiresFields(); updateTiresCalculatedDays();
-    document.getElementById('tires').addEventListener('change', toggleTiresFields);
-    document.querySelectorAll('.car-class-btn').forEach(btn => btn.addEventListener('click', ()=>{
+    const rateTable = { /* 略 同上 */ };
+    // render buttons
+    function renderCarClasses() {
+      const container = document.getElementById('carClassContainer'); container.innerHTML='';
+      ['J-1','J-2','J-3','J-4'].forEach(val => {
+        const btn = document.createElement('div'); btn.className='car-class-btn'; btn.textContent=val; btn.dataset.value=val;
+        btn.addEventListener('click', () => { document.querySelectorAll('.car-class-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); selectedCarClass=val; });
+        container.appendChild(btn);
+      });
+    }
+    function renderUsers() {
+      const container = document.getElementById('userContainer'); container.innerHTML='';
+      users.forEach(name=>{
+        const btn = document.createElement('div'); btn.className='user-btn'; btn.textContent=name; btn.dataset.user=name;
+        const rem = document.createElement('span'); rem.className='remove-user'; rem.textContent='×'; btn.appendChild(rem);
+        btn.addEventListener('click', e=>{ if(e.target===rem) removeUser(name); else selectUser(name); });
+        container.appendChild(btn);
+      });
+    }
+    function addUser() {
+      const name=document.getElementById('newUserName').value.trim(); if(!name||users.includes(name)) return;
+      users.push(name); localStorage.setItem('userList', JSON.stringify(users)); document.getElementById('newUserName').value=''; renderUsers();
+    }
+    function removeUser(name) {
+      users=users.filter(u=>u!==name); localStorage.setItem('userList', JSON.stringify(users)); localStorage.removeItem(`estimate_${name}`);
+      if(currentUser===name){ currentUser=null; document.getElementById('result').style.display='none'; } renderUsers();
+    }
+    function selectUser(name) {
+      currentUser=name; document.querySelectorAll('.user-btn').forEach(b=>b.classList.toggle('active', b.dataset.user===name)); loadUserEstimate(name);
+    }
+    function toggleTiresFields() {
+      document.getElementById('tiresFields').style.display = document.getElementById('tires').checked ? 'block' : 'none';
+    }
+    function updateTiresCalculatedDays() {
+      const v=document.getElementById('tiresStartDate').value; if(!v) return;
+      const sd=new Date(v), ed=getMonthEnd(sd);
+      document.getElementById('tiresEndDate').value = formatYYYYMMDD(ed);
+      document.getElementById('calculatedTiresDays').textContent = `計算されたスタッドレスタイヤ利用日数: ${Math.floor((ed-sd)/(1000*60*60*24))+1}日`;
+    }
+    function validateForm() {
+      let ok=true;
+      if(!document.getElementById('startDate').value) {document.getElementById('startDateError').style.display='block'; ok=false;} else document.getElementById('startDateError').style.display='none';
+      const days = +document.getElementById('days').value;
+      if(isNaN(days)||days<1){document.getElementById('daysError').style.display='block';ok=false;}else document.getElementById('daysError').style.display='none';
+      if(!selectedCarClass){document.getElementById('carClassError').style.display='block';ok=false;} else document.getElementById('carClassError').style.display='none';
+      if(document.getElementById('tires').checked){ if(!document.getElementById('tiresInputDays').value){document.getElementById('tiresInputDaysError').style.display='block';ok=false;}else document.getElementById('tiresInputDaysError').style.display='none'; if(!document.getElementById('tiresStartDate').value){document.getElementById('tiresStartDateError').style.display='block';ok=false;} else document.getElementById('tiresStartDateError').style.display='none'; }
+      return ok;
+    }
+    async function calculateAndShowResult() {
+      if(!validateForm())return;
+      const raw={ startDate:document.getElementById('startDate').value, days:+document.getElementById('days').value, tiresInputDays:+document.getElementById('tiresInputDays').value, tiresStartDate:document.getElementById('tiresStartDate').value, selectedCarClass, insurance:document.getElementById('insurance').checked, waiver:document.getElementById('waiver').checked, tires:document.getElementById('tires').checked, etc:document.getElementById('etc').checked, gps:document.getElementById('gps').checked };
+      let {startDate,days,insurance,waiver,tires,etc,gps,tiresInputDays}=raw;
+      let base=0,insCost=0,waCost=0,tiCost=0,etCost=0,gpCost=0,rem=days;
+      while(rem){ const d=Math.min(rem,30)-1; base+=rateTable[selectedCarClass][d]||0; if(insurance)insCost+=rateTable.INS_WAIVER[d]||0; if(waiver)waCost+=rateTable.INS_WAIVER[d]||0; if(etc)etCost+=rateTable.ETC_NAV[d]||0; if(gps)gpCost+=rateTable.ETC_NAV[d]||0; rem-=(d+1);}      
+      if(tires){ let tr=tiresInputDays;while(tr){const d=Math.min(tr,30)-1;tiCost+=rateTable.WINTER_TIRES[d]||0;tr-=(d+1);}}
+      const subtotal=base+insCost+waCost+tiCost+etCost+gpCost;
+      const tax=Math.round(subtotal*0.1), total=subtotal+tax;
+      const sd=new Date(startDate), rd=new Date(sd); rd.setDate(sd.getDate()+days);
+      const fs=formatDateGlobal(sd), fr=formatDateGlobal(rd);
+      let html=`<div class="result-row"><span class="result-label">開始:</span><span class="result-value">${fs}</span></div>`+
+               `<div class="result-row"><span class="result-label">返却:</span><span class="result-value">${fr}</span></div>`+
+               `<div class="result-row"><span class="result-label">日数:</span><span class="result-value">${days}日</span></div>`+
+               `<div class="result-row"><span class="result-label">クラス:</span><span class="result-value">${selectedCarClass}</span></div>`+
+               `<div class="result-row"><span class="result-label">基本:</span><span class="result-value">¥${base.toLocaleString()}</span></div>`;
+      if(insurance)html+=`<div class="result-row"><span class="result-label">保険:</span><span class="result-value">¥${insCost.toLocaleString()}</span></div>`;
+      if(waiver)html+=`<div class="result-row"><span class="result-label">免責:</span><span class="result-value">¥${waCost.toLocaleString()}</span></div>`;
+      if(tires)html+=`<div class="result-row"><span class="result-label">タイヤ:</span><span class="result-value">¥${tiCost.toLocaleString()}</span></div>`;
+      if(etc)html+=`<div class="result-row"><span class="result-label">ETC:</span><span class="result-value">¥${etCost.toLocaleString()}</span></div>`;
+      if(gps)html+=`<div class="result-row"><span class="result-label">ナビ:</span><span class="result-value">¥${gpCost.toLocaleString()}</span></div>`;
+      html+=`<div class="result-row"><span class="result-label">小計:</span><span class="result-value">¥${subtotal.toLocaleString()}</span></div>`+
+            `<div class="result-row"><span class="result-label">税10%:</span><span class="result-value">¥${tax.toLocaleString()}</span></div>`+
+            `<div class="result-row total-row"><span class="result-label">合計:</span><span class="result-value">¥${total.toLocaleString()}</span></div>`;
+      document.getElementById('resultContent').innerHTML=html;
+      document.getElementById('result').style.display='block';
+      localStorage.setItem(`estimate_${currentUser}`,JSON.stringify(raw));
+    }
+    function copyResult(){ let t='';document.querySelectorAll('.result-row').forEach(r=>t+=r.querySelector('.result-label').innerText+'
