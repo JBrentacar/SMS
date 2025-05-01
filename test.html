@@ -23,7 +23,6 @@
     button[disabled] { background:#999; cursor:not-allowed; }
     .note { font-size:0.9em; color:#555; }
     .hidden { display:none; }
-    /* Step2 個人/法人コンテナ初期非表示 */
     #personal-info, #corporate-info { display:none; }
   </style>
 </head>
@@ -284,47 +283,63 @@
   const steps      = document.querySelectorAll('.form-step');
   const nextBtns   = document.querySelectorAll('.btn-next');
   const prevBtns   = document.querySelectorAll('.btn-prev');
+  const progress   = document.querySelector('.progress-inner');
   let   current    = 0;
 
-  // 各ステップの「次へ」ボタンを有効化／無効化する関数
+  // プログレスバー更新
+  function updateProgress() {
+    const pct = (current) / (steps.length - 1) * 100;
+    progress.style.width = pct + '%';
+  }
+
+  // 「次へ」ボタンの有効/無効を判定
   function updateNextState() {
     const stepEl = steps[current];
     const inputs = Array.from(stepEl.querySelectorAll('input, select, textarea'));
-    // disabled か valid のどちらかを満たすかチェック
     const allValid = inputs.every(i => i.disabled || i.checkValidity());
     nextBtns[current].disabled = !allValid;
   }
 
-  // ステップを表示切替
+  // ステップ切り替え
   function showStep(idx) {
     steps.forEach((s,i) => s.classList.toggle('active', i === idx));
-    
-    // ステップ2なら個人／法人フォームだけ表示
-    if(idx === 1) {
+    updateProgress();
+
+    // ステップ2だけ個人/法人を切り替え
+    if (idx === 1) {
       const isCorp = document.getElementById('use-corporate').checked;
       document.getElementById('personal-info' ).style.display = isCorp ? 'none' : 'block';
-      document.getElementById('corporate-info').style.display = isCorp ? 'block': 'none';
+      document.getElementById('corporate-info').style.display = isCorp ? 'block' : 'none';
+
+      // 必要なフィールドだけ enable/disable
+      document.querySelectorAll('#personal-info input, #personal-info select, #personal-info textarea')
+        .forEach(el => el.disabled = isCorp);
+      document.querySelectorAll('#corporate-info input, #corporate-info select, #corporate-info textarea')
+        .forEach(el => el.disabled = !isCorp);
+
+    } else {
+      // 他ステップでは両方 enable
+      document.querySelectorAll('#personal-info input, #personal-info select, #personal-info textarea')
+        .forEach(el => el.disabled = false);
+      document.querySelectorAll('#corporate-info input, #corporate-info select, #corporate-info textarea')
+        .forEach(el => el.disabled = false);
     }
-    
-    // 初回・戻る後にも状態を再判定
+
     updateNextState();
   }
 
-  // イベント登録
-  steps.forEach((step, idx) => {
-    // そのステップ内の全 input/select/textarea に対して…
+  // 各ステップ内の input/select/textarea にイベントを張る
+  steps.forEach((step) => {
     const inputs = step.querySelectorAll('input, select, textarea');
     inputs.forEach(i => {
-      // 変化があるたびにボタン状態を更新
       i.addEventListener('input',  updateNextState);
       i.addEventListener('change', updateNextState);
     });
   });
 
-  // 次へボタン
+  // 「次へ」ボタン
   nextBtns.forEach((btn, idx) => {
     btn.addEventListener('click', () => {
-      // 先に必須チェックを通す（念のため）
       updateNextState();
       if (!btn.disabled && idx < steps.length - 1) {
         current = idx + 1;
@@ -333,8 +348,8 @@
     });
   });
 
-  // 戻るボタン
-  prevBtns.forEach((btn, idx) => {
+  // 「戻る」ボタン
+  prevBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       if (current > 0) {
         current--;
@@ -347,6 +362,7 @@
   showStep(0);
 })();
 </script>
+
 
 </body>
 </html>
