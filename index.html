@@ -356,17 +356,24 @@
       lastEstimate = {startDate:fs, returnDate:fr, days, class:selectedCarClass, basic:totalBaseRate,
         insurance:insuranceCost, waiver:waiverCost, tires:tiresCost, etc:etcCost, gps:gpsCost,
         subtotal, tax, total};
-      let ext = `お世話になっております。\nJBレンタカー石巻店です。\n\n${fs}でレンタカー契約が満了いたします。\nご延長はどうなさいますか？\n\nご延長の場合は、下記のとおりご案内致します。\n\nご利用開始日: ${fs}\nご返却日: ${fr}\nご利用日数: ${days}日間\nクラス: ${selectedCarClass}\n基本料金: ¥${totalBaseRate.toLocaleString()}\n`;
-      if(insuranceCost>0) ext+=`車両保険: ¥${insuranceCost.toLocaleString()}\n`;
-      if(waiverCost>0)    ext+=`免責補償: ¥${waiverCost.toLocaleString()}\n`;
-      if(tiresCost>0)     ext+=`スタッドレスタイヤ: ¥${tiresCost.toLocaleString()}\n`;
-      if(etcCost>0)       ext+=`ETC: ¥${etcCost.toLocaleString()}\n`;
-      if(gpsCost>0)       ext+=`カーナビ: ¥${gpsCost.toLocaleString()}\n`;
-      ext+=`\n小計: ¥${subtotal.toLocaleString()}\n消費税(10%): ¥${tax.toLocaleString()}\n合計金額: ¥${total.toLocaleString()}\n`;
-      try {
-        const payDate = await getValidPaymentDate(new Date(startDate));
-        ext+=`\nお振込期日: ${formatDateGlobal(payDate)}\n\n以上、ご確認の上、ご連絡をお待ちしております。`;
-      } catch(e) { console.error(e); ext+="\n※お振込期日の算出に失敗しました。"; }
+     let ext = `お世話になっております。\nJBレンタカー石巻店です。\n\n${fs}でレンタカー契約が満了いたします。\nご延長はどうなさいますか？\n\nご延長の場合は、下記のとおりご案内致します。\n\nご利用開始日: ${fs}\nご返却日: ${fr}\nご利用日数: ${days}日間\nクラス: ${selectedCarClass}\n基本料金: ¥${totalBaseRate.toLocaleString()}\n`;
+if(insuranceCost > 0) ext += `車両保険: ¥${insuranceCost.toLocaleString()}\n`;
+if(waiverCost > 0)    ext += `免責補償: ¥${waiverCost.toLocaleString()}\n`;
+if(tiresCost > 0)     ext += `スタッドレスタイヤ: ¥${tiresCost.toLocaleString()}\n`;
+if(etcCost > 0)       ext += `ETC: ¥${etcCost.toLocaleString()}\n`;
+if(gpsCost > 0)       ext += `カーナビ: ¥${gpsCost.toLocaleString()}\n`;
+
+ext += `\n小計: ¥${subtotal.toLocaleString()}\n消費税(10%): ¥${tax.toLocaleString()}\n合計金額: ¥${total.toLocaleString()}\n`;
+
+// ここで振込先を追加
+ext += `\n【お振込先】\n七十七銀行 新中里支店\n普通口座 5023291\n株式会社NIKKEN\n`;
+
+try {
+    const payDate = await getValidPaymentDate(new Date(startDate));
+    ext += `\nお振込期日: ${formatDateGlobal(payDate)}\n\n以上、ご確認の上、ご連絡をお待ちしております。`;
+}
+
+      catch(e) { console.error(e); ext+="\n※お振込期日の算出に失敗しました。"; }
       document.getElementById("extensionOutput").value = ext;
     }
     function copyTextToClipboard(text) {
