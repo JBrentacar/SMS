@@ -7,11 +7,13 @@
   <style>
     body { font-family: Arial, sans-serif; background: #f9f9f9; margin:0; padding:20px; }
     .form-container { max-width:800px; margin:0 auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
-    h1 { text-align:center; color:#0068e9; margin-bottom:20px; }
+    h1 { text-align:center; color:#0068e9; margin-bottom:10px; }
+    .progress-bar { background:#eee; border-radius:4px; overflow:hidden; margin-bottom:20px; height:8px; }
+    .progress-inner { background:#0068e9; height:100%; width:0%; transition:width .3s ease; }
     .form-step { display:none; }
     .form-step.active { display:block; }
     .form-group { margin-bottom:15px; }
-    label { display:block; margin-bottom:5px; }
+    label { display:block; margin-bottom:5px; font-weight:bold; }
     input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"], select, textarea {
       width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;
     }
@@ -21,31 +23,31 @@
     button[disabled] { background:#999; cursor:not-allowed; }
     .note { font-size:0.9em; color:#555; }
     .hidden { display:none; }
+    /* Step2 個人/法人コンテナ初期非表示 */
+    #personal-info, #corporate-info { display:none; }
   </style>
 </head>
 <body>
   <div class="form-container">
     <h1>JBレンタカー石巻店ご利用者申請フォーム</h1>
+    <div class="progress-bar"><div class="progress-inner"></div></div>
     <form action="https://ssgform.com/s/iCcjdP7Py647" method="post" id="rentalForm">
-      
       <!-- Step 1: ご利用種別 -->
       <div class="form-step active">
         <div class="form-group">
           <label>ご利用種別 <span style="color:red;">*</span></label>
           <input type="radio" name="ご利用種別" id="use-personal" value="個人" required>
-          <label for="use-personal">個人</label>
+          <label for="use-personal" style="display:inline; font-weight:normal;">個人</label>
           <input type="radio" name="ご利用種別" id="use-corporate" value="法人">
-          <label for="use-corporate">法人</label>
+          <label for="use-corporate" style="display:inline; font-weight:normal;">法人</label>
         </div>
         <div class="button-group">
           <span></span>
-          <button type="button" class="btn-next">次へ</button>
+          <button type="button" class="btn-next" disabled>次へ</button>
         </div>
       </div>
-      
       <!-- Step 2: 個人 or 法人 情報 -->
       <div class="form-step">
-        <!-- 個人情報 -->
         <div id="personal-info">
           <div class="form-group">
             <label for="p-name">ご契約者様名 <span style="color:red;">*</span></label>
@@ -77,27 +79,26 @@
             <input type="email" id="p-email" name="メールアドレス" required>
           </div>
           <div class="form-group">
-            <label for="p-license">運転免許証番号（表面12桁） <span style="color:red;">*</span></label>
+            <label for="p-license">運転免許証番号（表面12桁）</label>
             <input type="text" id="p-license" name="運転免許証番号" pattern="\d{12}">
           </div>
         </div>
-        <!-- 法人情報 -->
         <div id="corporate-info">
           <div class="form-group">
             <label for="c-company">法人名 <span style="color:red;">*</span></label>
-            <input type="text" id="c-company" name="法人名" >
+            <input type="text" id="c-company" name="法人名" required>
           </div>
           <div class="form-group">
             <label for="c-company-kana">法人名（フリガナ） <span style="color:red;">*</span></label>
-            <input type="text" id="c-company-kana" name="法人名（フリガナ）">
+            <input type="text" id="c-company-kana" name="法人名（フリガナ）" required>
           </div>
           <div class="form-group">
             <label for="c-rep">代表者様名 <span style="color:red;">*</span></label>
-            <input type="text" id="c-rep" name="代表者様名">
+            <input type="text" id="c-rep" name="代表者様名" required>
           </div>
           <div class="form-group">
             <label for="c-rep-kana">代表者様名（フリガナ） <span style="color:red;">*</span></label>
-            <input type="text" id="c-rep-kana" name="代表者様名（フリガナ）">
+            <input type="text" id="c-rep-kana" name="代表者様名（フリガナ）" required>
           </div>
           <div class="form-group">
             <label for="c-rep-tel">代表電話番号</label>
@@ -105,11 +106,11 @@
           </div>
           <div class="form-group">
             <label for="c-contact">ご担当者様名 <span style="color:red;">*</span></label>
-            <input type="text" id="c-contact" name="ご担当者様名">
+            <input type="text" id="c-contact" name="ご担当者様名" required>
           </div>
           <div class="form-group">
             <label for="c-contact-kana">ご担当者様名（フリガナ） <span style="color:red;">*</span></label>
-            <input type="text" id="c-contact-kana" name="ご担当者様名（フリガナ）">
+            <input type="text" id="c-contact-kana" name="ご担当者様名（フリガナ）" required>
           </div>
           <div class="form-group">
             <label for="c-contact-tel">ご担当者様電話番号 <span style="color:red;">*</span></label>
@@ -117,11 +118,11 @@
           </div>
           <div class="form-group">
             <label for="c-zip">郵便番号（ハイフンなし7桁） <span style="color:red;">*</span></label>
-            <input type="text" id="c-zip" name="郵便番号" pattern="\d{7}">
+            <input type="text" id="c-zip" name="郵便番号" pattern="\d{7}" required>
           </div>
           <div class="form-group">
             <label for="c-address">住所 <span style="color:red;">*</span></label>
-            <input type="text" id="c-address" name="住所">
+            <input type="text" id="c-address" name="住所" required>
             <small class="note">建物名は次の欄にご記入ください。</small>
           </div>
           <div class="form-group">
@@ -130,12 +131,12 @@
           </div>
           <div class="form-group">
             <label for="c-email">メールアドレス <span style="color:red;">*</span></label>
-            <input type="email" id="c-email" name="メールアドレス">
+            <input type="email" id="c-email" name="メールアドレス" required>
           </div>
         </div>
         <div class="button-group">
           <button type="button" class="btn-prev">戻る</button>
-          <button type="button" class="btn-next">次へ</button>
+          <button type="button" class="btn-next" disabled>次へ</button>
         </div>
       </div>
       
@@ -278,57 +279,74 @@
     </form>
   </div>
 
-  <script>
-    (function(){
-      const steps = document.querySelectorAll('.form-step');
-      let current = 0;
+<script>
+(function(){
+  const steps      = document.querySelectorAll('.form-step');
+  const nextBtns   = document.querySelectorAll('.btn-next');
+  const prevBtns   = document.querySelectorAll('.btn-prev');
+  let   current    = 0;
 
-      const showStep = idx => {
-        steps.forEach((s,i)=>s.classList.toggle('active', i===idx));
-        // Terms切り替え
-        const isCorp = document.getElementById('use-corporate').checked;
-        document.getElementById('terms-personal').style.display = isCorp ? 'none' : 'block';
-        document.getElementById('terms-corporate').style.display = isCorp ? 'block' : 'none';
-      };
+  // 各ステップの「次へ」ボタンを有効化／無効化する関数
+  function updateNextState() {
+    const stepEl = steps[current];
+    const inputs = Array.from(stepEl.querySelectorAll('input, select, textarea'));
+    // disabled か valid のどちらかを満たすかチェック
+    const allValid = inputs.every(i => i.disabled || i.checkValidity());
+    nextBtns[current].disabled = !allValid;
+  }
 
-      document.querySelectorAll('.btn-next').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const curStepEl = steps[current];
-          const inputs = Array.from(curStepEl.querySelectorAll('input,select,textarea'));
-          // カスタムロジック：個人/法人情報Disable
-          if(current===0){
-            const isCorp = document.getElementById('use-corporate').checked;
-            document.querySelectorAll('#personal-info input, #personal-info select').forEach(el=>el.disabled = isCorp);
-            document.querySelectorAll('#corporate-info input, #corporate-info select').forEach(el=>el.disabled = !isCorp);
-          }
-          // 必須チェック
-          if(!inputs.every(i=> i.disabled || i.checkValidity())){
-            inputs.forEach(i=> { if(!i.disabled) i.reportValidity() });
-            return;
-          }
-          if(current < steps.length-1){
-            current++;
-            showStep(current);
-          }
-        });
-      });
-      document.querySelectorAll('.btn-prev').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          if(current>0){
-            current--;
-            showStep(current);
-          }
-        });
-      });
-      // 配送サービス表示制御
-      const daysInput = document.getElementById('days');
-      const deliveryGrp = document.getElementById('delivery-group');
-      daysInput.addEventListener('input', ()=>{
-        deliveryGrp.classList.toggle('hidden', parseInt(daysInput.value,10) < 30);
-      });
-      // 初期表示
-      showStep(current);
-    })();
-  </script>
+  // ステップを表示切替
+  function showStep(idx) {
+    steps.forEach((s,i) => s.classList.toggle('active', i === idx));
+    
+    // ステップ2なら個人／法人フォームだけ表示
+    if(idx === 1) {
+      const isCorp = document.getElementById('use-corporate').checked;
+      document.getElementById('personal-info' ).style.display = isCorp ? 'none' : 'block';
+      document.getElementById('corporate-info').style.display = isCorp ? 'block': 'none';
+    }
+    
+    // 初回・戻る後にも状態を再判定
+    updateNextState();
+  }
+
+  // イベント登録
+  steps.forEach((step, idx) => {
+    // そのステップ内の全 input/select/textarea に対して…
+    const inputs = step.querySelectorAll('input, select, textarea');
+    inputs.forEach(i => {
+      // 変化があるたびにボタン状態を更新
+      i.addEventListener('input',  updateNextState);
+      i.addEventListener('change', updateNextState);
+    });
+  });
+
+  // 次へボタン
+  nextBtns.forEach((btn, idx) => {
+    btn.addEventListener('click', () => {
+      // 先に必須チェックを通す（念のため）
+      updateNextState();
+      if (!btn.disabled && idx < steps.length - 1) {
+        current = idx + 1;
+        showStep(current);
+      }
+    });
+  });
+
+  // 戻るボタン
+  prevBtns.forEach((btn, idx) => {
+    btn.addEventListener('click', () => {
+      if (current > 0) {
+        current--;
+        showStep(current);
+      }
+    });
+  });
+
+  // 初期表示
+  showStep(0);
+})();
+</script>
+
 </body>
 </html>
