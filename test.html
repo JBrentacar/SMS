@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JBレンタカー石巻店ご利用者申請フォーム</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin:0; padding:20px; }
+    .form-container { max-width:800px; margin:0 auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+    h1 { text-align:center; color:#0068e9; margin-bottom:20px; }
+    .form-step { display:none; }
+    .form-step.active { display:block; }
+    .form-group { margin-bottom:15px; }
+    label { display:block; margin-bottom:5px; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"], select, textarea {
+      width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;
+    }
+    textarea { resize:vertical; }
+    .button-group { display:flex; justify-content: space-between; margin-top:20px; }
+    button { background:#0068e9; color:#fff; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; }
+    button[disabled] { background:#999; cursor:not-allowed; }
+    .note { font-size:0.9em; color:#555; }
+    .hidden { display:none; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>JBレンタカー石巻店ご利用者申請フォーム</h1>
+    <form action="https://ssgform.com/s/iCcjdP7Py647" method="post" id="rentalForm">
+      
+      <!-- Step 1: ご利用種別 -->
+      <div class="form-step active">
+        <div class="form-group">
+          <label>ご利用種別 <span style="color:red;">*</span></label>
+          <input type="radio" name="ご利用種別" id="use-personal" value="個人" required>
+          <label for="use-personal">個人</label>
+          <input type="radio" name="ご利用種別" id="use-corporate" value="法人">
+          <label for="use-corporate">法人</label>
+        </div>
+        <div class="button-group">
+          <span></span>
+          <button type="button" class="btn-next">次へ</button>
+        </div>
+      </div>
+      
+      <!-- Step 2: 個人 or 法人 情報 -->
+      <div class="form-step">
+        <!-- 個人情報 -->
+        <div id="personal-info">
+          <div class="form-group">
+            <label for="p-name">ご契約者様名 <span style="color:red;">*</span></label>
+            <input type="text" id="p-name" name="ご契約者様名" required>
+          </div>
+          <div class="form-group">
+            <label for="p-name-kana">ご契約者様名（フリガナ） <span style="color:red;">*</span></label>
+            <input type="text" id="p-name-kana" name="ご契約者様名（フリガナ）" required>
+          </div>
+          <div class="form-group">
+            <label for="p-zip">郵便番号（ハイフンなし7桁） <span style="color:red;">*</span></label>
+            <input type="text" id="p-zip" name="郵便番号" pattern="\d{7}" required>
+          </div>
+          <div class="form-group">
+            <label for="p-address">住所 <span style="color:red;">*</span></label>
+            <input type="text" id="p-address" name="住所" required>
+            <small class="note">建物名は次の欄にご記入ください。</small>
+          </div>
+          <div class="form-group">
+            <label for="p-building">建物名</label>
+            <input type="text" id="p-building" name="建物名">
+          </div>
+          <div class="form-group">
+            <label for="p-tel">携帯電話番号 <span style="color:red;">*</span></label>
+            <input type="tel" id="p-tel" name="携帯電話番号" pattern="\d+" required>
+          </div>
+          <div class="form-group">
+            <label for="p-email">メールアドレス <span style="color:red;">*</span></label>
+            <input type="email" id="p-email" name="メールアドレス" required>
+          </div>
+          <div class="form-group">
+            <label for="p-license">運転免許証番号（表面12桁） <span style="color:red;">*</span></label>
+            <input type="text" id="p-license" name="運転免許証番号" pattern="\d{12}">
+          </div>
+        </div>
+        <!-- 法人情報 -->
+        <div id="corporate-info">
+          <div class="form-group">
+            <label for="c-company">法人名 <span style="color:red;">*</span></label>
+            <input type="text" id="c-company" name="法人名" >
+          </div>
+          <div class="form-group">
+            <label for="c-company-kana">法人名（フリガナ） <span style="color:red;">*</span></label>
+            <input type="text" id="c-company-kana" name="法人名（フリガナ）">
+          </div>
+          <div class="form-group">
+            <label for="c-rep">代表者様名 <span style="color:red;">*</span></label>
+            <input type="text" id="c-rep" name="代表者様名">
+          </div>
+          <div class="form-group">
+            <label for="c-rep-kana">代表者様名（フリガナ） <span style="color:red;">*</span></label>
+            <input type="text" id="c-rep-kana" name="代表者様名（フリガナ）">
+          </div>
+          <div class="form-group">
+            <label for="c-rep-tel">代表電話番号</label>
+            <input type="tel" id="c-rep-tel" name="代表電話番号" pattern="\d+">
+          </div>
+          <div class="form-group">
+            <label for="c-contact">ご担当者様名 <span style="color:red;">*</span></label>
+            <input type="text" id="c-contact" name="ご担当者様名">
+          </div>
+          <div class="form-group">
+            <label for="c-contact-kana">ご担当者様名（フリガナ） <span style="color:red;">*</span></label>
+            <input type="text" id="c-contact-kana" name="ご担当者様名（フリガナ）">
+          </div>
+          <div class="form-group">
+            <label for="c-contact-tel">ご担当者様電話番号 <span style="color:red;">*</span></label>
+            <input type="tel" id="c-contact-tel" name="ご担当者様電話番号" pattern="\d+" required>
+          </div>
+          <div class="form-group">
+            <label for="c-zip">郵便番号（ハイフンなし7桁） <span style="color:red;">*</span></label>
+            <input type="text" id="c-zip" name="郵便番号" pattern="\d{7}">
+          </div>
+          <div class="form-group">
+            <label for="c-address">住所 <span style="color:red;">*</span></label>
+            <input type="text" id="c-address" name="住所">
+            <small class="note">建物名は次の欄にご記入ください。</small>
+          </div>
+          <div class="form-group">
+            <label for="c-building">建物名</label>
+            <input type="text" id="c-building" name="建物名">
+          </div>
+          <div class="form-group">
+            <label for="c-email">メールアドレス <span style="color:red;">*</span></label>
+            <input type="email" id="c-email" name="メールアドレス">
+          </div>
+        </div>
+        <div class="button-group">
+          <button type="button" class="btn-prev">戻る</button>
+          <button type="button" class="btn-next">次へ</button>
+        </div>
+      </div>
+      
+      <!-- Step 3: ご希望クラス -->
+      <div class="form-step">
+        <div class="form-group">
+          <label>ご希望クラス <span style="color:red;">*</span></label>
+          <select name="ご希望クラス" required>
+            <option value="">選択してください</option>
+            <option value="J-1（2ドア／軽自動車）">J-1（2ドア／軽自動車） アルト、ミラなど</option>
+            <option value="J-2（4ドア／軽自動車）">J-2（4ドア／軽自動車） ワゴンR、ライフなど</option>
+            <option value="J-3（軽貨物バンタイプ）">J-3（軽貨物バンタイプ） ハイゼットなど</option>
+            <option value="J-4（小型乗用車）">J-4（小型乗用車） ヴィッツ、フィットなど</option>
+          </select>
+          <small class="note">未表示クラスは現在貸出停止中です。</small>
+        </div>
+        <div class="button-group">
+          <button type="button" class="btn-prev">戻る</button>
+          <button type="button" class="btn-next">次へ</button>
+        </div>
+      </div>
+      
+      <!-- Step 4: オプション -->
+      <div class="form-step">
+        <div class="form-group">
+          <label>オプション <span style="color:red;">*</span></label>
+          <input type="checkbox" name="オプション[]" value="車両保険" id="opt-insurance">
+          <label for="opt-insurance">車両保険</label><br>
+          <input type="checkbox" name="オプション[]" value="免責補償" id="opt-waiver">
+          <label for="opt-waiver">免責補償</label><br>
+          <input type="checkbox" name="オプション[]" value="スタッドレスタイヤ" id="opt-tire">
+          <label for="opt-tire">スタッドレスタイヤ</label><br>
+          <input type="checkbox" name="オプション[]" value="ETC" id="opt-etc">
+          <label for="opt-etc">ETC</label><br>
+          <input type="checkbox" name="オプション[]" value="カーナビ" id="opt-navi">
+          <label for="opt-navi">カーナビ</label><br>
+          <input type="checkbox" name="オプション[]" value="全て加入しない" id="opt-none">
+          <label for="opt-none">【全て加入しない】</label>
+        </div>
+        <p class="note">
+          空き状況によりご案内不可のオプションがあります。<br>
+          スタッドレスタイヤは12月～3月必須。途中加入不可。
+        </p>
+        <div class="button-group">
+          <button type="button" class="btn-prev">戻る</button>
+          <button type="button" class="btn-next">次へ</button>
+        </div>
+      </div>
+      
+      <!-- Step 5: ご利用開始日 etc. -->
+      <div class="form-step">
+        <div class="form-group">
+          <label for="start-date">ご利用開始日 <span style="color:red;">*</span></label>
+          <input type="date" id="start-date" name="ご利用開始日" required>
+          <p class="note">営業時間 平日9:00〜18:00（水曜除く）/ 土日10:00〜16:00（定休日：水・祝）</p>
+        </div>
+        <div class="form-group">
+          <label for="days">ご利用日数 <span style="color:red;">*</span></label>
+          <input type="number" id="days" name="ご利用日数" min="7" value="7" required>
+          <small class="note">最短7日</small>
+        </div>
+        <div class="form-group hidden" id="delivery-group">
+          <label>配送サービス利用の有無</label>
+          <input type="radio" name="配送サービス利用の有無" value="利用する" id="del-yes">
+          <label for="del-yes">利用する</label>
+          <input type="radio" name="配送サービス利用の有無" value="利用しない" id="del-no" checked>
+          <label for="del-no">利用しない</label>
+          <p class="note">ご返却はJBレンタカー石巻店まで。</p>
+        </div>
+        <div class="button-group">
+          <button type="button" class="btn-prev">戻る</button>
+          <button type="button" class="btn-next">次へ</button>
+        </div>
+      </div>
+      
+      <!-- Step 6: 緊急連絡先 -->
+      <div class="form-step">
+        <p>運転者様に事故等発生時に連絡する方</p>
+        <div class="form-group">
+          <label for="e-name">お名前 <span style="color:red;">*</span></label>
+          <input type="text" id="e-name" name="緊急連絡先_お名前" required>
+        </div>
+        <div class="form-group">
+          <label for="e-name-kana">お名前（フリガナ） <span style="color:red;">*</span></label>
+          <input type="text" id="e-name-kana" name="緊急連絡先_お名前（フリガナ）" required>
+        </div>
+        <div class="form-group">
+          <label for="e-tel">電話番号 <span style="color:red;">*</span></label>
+          <input type="tel" id="e-tel" name="緊急連絡先_電話番号" pattern="\d+" required>
+        </div>
+        <div class="form-group">
+          <label for="e-relation">ご関係 <span style="color:red;">*</span></label>
+          <input type="text" id="e-relation" name="緊急連絡先_ご関係" required>
+          <small class="note">例：家族、友人、同僚など</small>
+        </div>
+        <div class="button-group">
+          <button type="button" class="btn-prev">戻る</button>
+          <button type="button" class="btn-next">次へ</button>
+        </div>
+      </div>
+      
+      <!-- Step 7: 支払方法・注意事項 -->
+      <div class="form-step">
+        <!-- 個人と法人で内容を切り替え -->
+        <div id="terms-personal">
+          <div class="form-group">
+            <input type="checkbox" id="t1" name="お支払方法_personal" value="クレジットカードのみ" required>
+            <label for="t1">お支払方法は原則クレジットカードのみ（お持ちでない方は事前連絡ください。）</label>
+          </div>
+          <div class="form-group">
+            <input type="checkbox" id="t2" name="申請注意事項_personal" value="空車状況により案内不可" required>
+            <label for="t2">申請後でも空車状況によりご案内できない場合があります。</label>
+          </div>
+        </div>
+        <div id="terms-corporate">
+          <div class="form-group">
+            <label>お支払方法 <span style="color:red;">*</span></label>
+            <input type="radio" name="お支払方法_corporate" value="銀行振込（前営業日まで）" required>
+            <label>銀行振込（前営業日まで）</label><br>
+            <input type="radio" name="お支払方法_corporate" value="当日現金支払い">
+            <label>当日現金支払い</label><br>
+            <input type="radio" name="お支払方法_corporate" value="当日カード決済">
+            <label>当日カード決済</label>
+          </div>
+          <div class="form-group">
+            <input type="checkbox" id="corp-seal" name="申請注意事項_corporate" value="印鑑証明書提出の場合あり">
+            <label for="corp-seal">場合により法人印鑑証明書等の提出を求める場合があります。</label>
+          </div>
+          <div class="form-group">
+            <input type="checkbox" id="corp-note" name="申請注意事項_corporate" value="空車状況により案内不可" required>
+            <label for="corp-note">申請後でも空車状況によりご案内できない場合があります。</label>
+          </div>
+        </div>
+        <div class="button-group">
+          <button type="button" class="btn-prev">戻る</button>
+          <button type="submit">送信する</button>
+        </div>
+      </div>
+      
+    </form>
+  </div>
+
+  <script>
+    (function(){
+      const steps = document.querySelectorAll('.form-step');
+      let current = 0;
+
+      const showStep = idx => {
+        steps.forEach((s,i)=>s.classList.toggle('active', i===idx));
+        // Terms切り替え
+        const isCorp = document.getElementById('use-corporate').checked;
+        document.getElementById('terms-personal').style.display = isCorp ? 'none' : 'block';
+        document.getElementById('terms-corporate').style.display = isCorp ? 'block' : 'none';
+      };
+
+      document.querySelectorAll('.btn-next').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const curStepEl = steps[current];
+          const inputs = Array.from(curStepEl.querySelectorAll('input,select,textarea'));
+          // カスタムロジック：個人/法人情報Disable
+          if(current===0){
+            const isCorp = document.getElementById('use-corporate').checked;
+            document.querySelectorAll('#personal-info input, #personal-info select').forEach(el=>el.disabled = isCorp);
+            document.querySelectorAll('#corporate-info input, #corporate-info select').forEach(el=>el.disabled = !isCorp);
+          }
+          // 必須チェック
+          if(!inputs.every(i=> i.disabled || i.checkValidity())){
+            inputs.forEach(i=> { if(!i.disabled) i.reportValidity() });
+            return;
+          }
+          if(current < steps.length-1){
+            current++;
+            showStep(current);
+          }
+        });
+      });
+      document.querySelectorAll('.btn-prev').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          if(current>0){
+            current--;
+            showStep(current);
+          }
+        });
+      });
+      // 配送サービス表示制御
+      const daysInput = document.getElementById('days');
+      const deliveryGrp = document.getElementById('delivery-group');
+      daysInput.addEventListener('input', ()=>{
+        deliveryGrp.classList.toggle('hidden', parseInt(daysInput.value,10) < 30);
+      });
+      // 初期表示
+      showStep(current);
+    })();
+  </script>
+</body>
+</html>
