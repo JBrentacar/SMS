@@ -282,17 +282,24 @@
 
     // Step5.5 表示内容切替
     if(i === 5){
-      step55.style.display = 'block';
-      const days = +daysInput.value;
-      if(days < 30){
+    step55.style.display = 'block';
+    const days = +daysInput.value;
+    if(days < 30){
+      // 7～29日はこれまでどおり
+      visitGrp.classList.remove('hidden');
+      populateVisitTimes();
+    } else {
+      // 30日以上はまず配送サービス問い
+      delSvcGrp.classList.remove('hidden');
+      populateDeliveryTimes();
+
+      // 追加：デフォルト「利用しない」がチェックされていたら
+      if(document.getElementById('del-no').checked){
         visitGrp.classList.remove('hidden');
         populateVisitTimes();
-      } else {
-        delSvcGrp.classList.remove('hidden');
-        populateDeliveryTimes();
       }
     }
-
+  }
     // Step5 で7日未満なら丸め
     if(i===4 && +daysInput.value < 7){
       daysInput.value = 7;
