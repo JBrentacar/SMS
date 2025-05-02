@@ -5,25 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JBレンタカー石巻店ご利用者申請フォーム</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 20px; }
-    .form-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    h1 { text-align: center; color: #0068e9; margin-bottom: 10px; }
-    .progress-bar { background: #eee; border-radius: 4px; overflow: hidden; margin-bottom: 20px; height: 8px; }
-    .progress-inner { background: #0068e9; height: 100%; width: 0; transition: width .3s ease; }
-    .form-step { display: none; }
-    .form-step.active { display: block; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"], select, textarea {
-      width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin:0; padding:20px; }
+    .form-container { max-width:800px; margin:0 auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+    h1 { text-align:center; color:#0068e9; margin-bottom:10px; }
+    .progress-bar { background:#eee; border-radius:4px; overflow:hidden; margin-bottom:20px; height:8px; }
+    .progress-inner { background:#0068e9; height:100%; width:0; transition:width .3s ease; }
+    .form-step { display:none; }
+    .form-step.active { display:block; }
+    .form-group { margin-bottom:15px; }
+    label { display:block; margin-bottom:5px; font-weight:bold; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
+      width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;
     }
-    textarea { resize: vertical; }
-    .button-group { display: flex; justify-content: space-between; margin-top: 20px; }
-    button { background: #0068e9; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-    button[disabled] { background: #999; cursor: not-allowed; }
-    .note { font-size: 0.9em; color: #555; }
-    .hidden { display: none; }
-    #personal-info, #corporate-info, #terms-personal, #terms-corporate { display: none; }
+    .day-picker { display:flex; align-items:center; }
+    .day-picker button { width:32px; height:32px; margin:0 8px; }
+    .day-picker #days-value { width:40px; text-align:center; }
+    input[readonly] { background:#f5f5f5; }
+    textarea { resize:vertical; }
+    .button-group { display:flex; justify-content: space-between; margin-top:20px; }
+    button { background:#0068e9; color:#fff; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; }
+    button[disabled] { background:#999; cursor:not-allowed; }
+    .note { font-size:0.9em; color:#555; }
+    .hidden { display:none; }
+    /* initial hide */
+    #personal-info, #corporate-info, #step5-5, #terms-personal, #terms-corporate { display:none; }
+    /* toggle switch */
+    .switch { position:relative; display:inline-block; width:40px; height:20px; margin-right:8px; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:20px; transition:.2s; }
+    .slider:before { position:absolute; content:""; height:16px; width:16px; left:2px; bottom:2px; background:white; transition:.2s; border-radius:50%; }
+    .switch input:checked + .slider { background:#0068e9; }
+    .switch input:checked + .slider:before { transform: translateX(20px); }
   </style>
 </head>
 <body>
@@ -31,111 +43,97 @@
     <h1>JBレンタカー石巻店ご利用者申請フォーム</h1>
     <div class="progress-bar"><div class="progress-inner"></div></div>
     <form action="https://ssgform.com/s/iCcjdP7Py647" method="post" id="rentalForm">
+
       <!-- Step 1 -->
-      <div class="form-step active">
+      <div class="form-step active" data-step="1">
         <div class="form-group">
           <label>ご利用種別 <span style="color:red">*</span></label>
           <input type="radio" id="use-personal" name="ご利用種別" value="個人" required>
-          <label for="use-personal" style="font-weight: normal; display: inline;">個人</label>
+          <label for="use-personal" style="font-weight:normal; display:inline;">個人</label>
           <input type="radio" id="use-corporate" name="ご利用種別" value="法人">
-          <label for="use-corporate" style="font-weight: normal; display: inline;">法人</label>
+          <label for="use-corporate" style="font-weight:normal; display:inline;">法人</label>
         </div>
-        <div class="button-group">
-          <span></span>
-          <button type="button" class="btn-next" disabled>次へ</button>
-        </div>
+        <div class="button-group"><span></span><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
+
       <!-- Step 2 -->
-      <div class="form-step">
+      <div class="form-step" data-step="2">
         <div id="personal-info">
           <div class="form-group"><label for="p-name">ご契約者様名 <span style="color:red">*</span></label><input type="text" id="p-name" name="ご契約者様名" required></div>
           <div class="form-group"><label for="p-name-kana">ご契約者様名（フリガナ） <span style="color:red">*</span></label><input type="text" id="p-name-kana" name="ご契約者様名（フリガナ）" required></div>
-          <div class="form-group"><label for="p-zip">郵便番号（ハイフン含まず7桁） <span style="color:red">*</span></label><input type="text" id="p-zip" name="郵便番号" pattern="\d{7}" required></div>
+          <div class="form-group"><label for="p-zip">郵便番号（ハイフン含まず7桁） <span style="color:red">*</span></label><input type="text" id="p-zip" name="郵便番号" required></div>
           <div class="form-group"><label for="p-address">住所 <span style="color:red">*</span></label><input type="text" id="p-address" name="住所" required><small class="note">建物名は次に入力します。</small></div>
-          <div class="form-group"><label for="p-building">建物名</label><input type="text" id="p-building" name="建物名"></div>
+          <div class="form-group"><label for="p-block">番地 <span style="color:red">*</span></label><input type="text" id="p-block" name="番地" required></div>
           <div class="form-group"><label for="p-tel">携帯電話番号 <span style="color:red">*</span></label><input type="tel" id="p-tel" name="携帯電話番号" pattern="\d+" required></div>
           <div class="form-group"><label for="p-email">メールアドレス <span style="color:red">*</span></label><input type="email" id="p-email" name="メールアドレス" required></div>
-          <div class="form-group"><label for="p-license">運転免許証番号<br><span style="font-size:0.9em">免許証表面の12ケタの番号</span></label><input type="text" id="p-license" name="運転免許証番号" pattern="\d{12}"></div>
+          <div class="form-group"><label for="p-license">運転免許証番号<br><span style="font-size:0.9em">免許証表面の12ケタの番号</span> <span style="color:red">*</span></label><input type="text" id="p-license" name="運転免許証番号" required></div>
         </div>
         <div id="corporate-info">
           <div class="form-group"><label for="c-company">法人名 <span style="color:red">*</span></label><input type="text" id="c-company" name="法人名" required></div>
           <div class="form-group"><label for="c-company-kana">法人名（フリガナ） <span style="color:red">*</span></label><input type="text" id="c-company-kana" name="法人名（フリガナ）" required></div>
           <div class="form-group"><label for="c-rep">代表者様名 <span style="color:red">*</span></label><input type="text" id="c-rep" name="代表者様名" required></div>
           <div class="form-group"><label for="c-rep-kana">代表者様名（フリガナ） <span style="color:red">*</span></label><input type="text" id="c-rep-kana" name="代表者様名（フリガナ）" required></div>
-          <div class="form-group"><label for="c-rep-tel">代表電話番号</label><input type="tel" id="c-rep-tel" name="代表電話番号" pattern="\d+"></div>
-          <div class="form-group"><label for="c-contact">ご担当者様名 <span style="color:red">*</span></label><input type="text" id="c-contact" name="ご担当者様名" required></div>
-          <div class="form-group"><label for="c-contact-kana">ご担当者様名（フリガナ） <span style="color:red">*</span></label><input type="text" id="c-contact-kana" name="ご担当者様名（フリガナ）" required></div>
-          <div class="form-group"><label for="c-contact-tel">ご担当者様電話番号 <span style="color:red">*</span></label><input type="tel" id="c-contact-tel" name="ご担当者様電話番号" pattern="\d+" required></div>
-          <div class="form-group"><label for="c-zip">郵便番号（ハイフン含まず7桁） <span style="color:red">*</span></label><input type="text" id="c-zip" name="郵便番号" pattern="\d{7}" required></div>
+          <div class="form-group"><label for="c-zip">郵便番号（ハイフン含まず7桁） <span style="color:red">*</span></label><input type="text" id="c-zip" name="郵便番号" required></div>
           <div class="form-group"><label for="c-address">住所 <span style="color:red">*</span></label><input type="text" id="c-address" name="住所" required><small class="note">建物名は次に入力します。</small></div>
-          <div class="form-group"><label for="c-building">建物名</label><input type="text" id="c-building" name="建物名"></div>
+          <div class="form-group"><label for="c-block">番地 <span style="color:red">*</span></label><input type="text" id="c-block" name="番地" required></div>
+          <div class="form-group"><label for="c-contact">ご担当者様名 <span style="color:red">*</span></label><input type="text" id="c-contact" name="ご担当者様名" required></div>
+          <div class="form-group"><label for="c-contact-tel">ご担当者様電話番号 <span style="color:red">*</span></label><input type="tel" id="c-contact-tel" name="ご担当者様電話番号" pattern="\d+" required></div>
           <div class="form-group"><label for="c-email">メールアドレス <span style="color:red">*</span></label><input type="email" id="c-email" name="メールアドレス" required></div>
         </div>
-        <div class="button-group">
-          <button type="button" class="btn-prev">戻る</button>
-          <button type="button" class="btn-next" disabled>次へ</button>
-        </div>
+        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
+
       <!-- Step 3 -->
-      <div class="form-step">
-        <div class="form-group">
-          <label>ご希望クラス <span style="color:red">*</span></label>
-          <select name="ご希望クラス" required>
-            <option value="">選択してください</option>
-            <option value="J-1（2ドア／軽自動車） アルト、ミラなど">J-1（2ドア／軽自動車） アルト、ミラなど</option>
-            <option value="J-2（4ドア／軽自動車） ワゴンR、ライフなど">J-2（4ドア／軽自動車） ワゴンR、ライフなど</option>
-            <option value="J-3（軽貨物バンタイプ） ハイゼットなど">J-3（軽貨物バンタイプ） ハイゼットなど</option>
-            <option value="J-4（小型乗用車） ヴィッツ、フィットなど">J-4（小型乗用車） ヴィッツ、フィットなど</option>
-          </select>
-          <small class="note">未表示のクラスは現在、貸し出しを停止しております。</small>
-        </div>
-        <div class="button-group">
-          <button type="button" class="btn-prev">戻る</button>
-          <button type="button" class="btn-next" disabled>次へ</button>
-        </div>
+      <div class="form-step" data-step="3">
+        <div class="form-group"><label>ご希望クラス <span style="color:red">*</span></label><select name="ご希望クラス" required><option value="">選択してください</option><option value="J-1（2ドア／軽自動車） アルト、ミラなど">J-1（2ドア／軽自動車） アルト、ミラなど</option><option value="J-2（4ドア／軽自動車） ワゴンR、ライフなど">J-2（4ドア／軽自動車） ワゴンR、ライフなど</option><option value="J-3（軽貨物バンタイプ） ハイゼットなど">J-3（軽貨物バンタイプ） ハイゼットなど</option><option value="J-4（小型乗用車） ヴィッツ、フィットなど">J-4（小型乗用車） ヴィッツ、フィットなど</option></select><small class="note">未表示のクラスは現在、貸し出しを停止しております。</small></div>
+        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
+
       <!-- Step 4 -->
-      <div class="form-step">
-        <div class="form-group">
-          <label>オプション <span style="color:red">*</span></label>
-          <input type="checkbox" id="opt-insurance" name="オプション[]" value="車両保険"><label for="opt-insurance" style="font-weight:normal; display:inline;">車両保険</label><br>
-          <input type="checkbox" id="opt-waiver" name="オプション[]" value="免責補償"><label for="opt-waiver" style="font-weight:normal; display:inline;">免責補償</label><br>
-          <input type="checkbox" id="opt-tire" name="オプション[]" value="スタッドレスタイヤ"><label for="opt-tire" style="font-weight:normal; display:inline;">スタッドレスタイヤ</label><br>
-          <input type="checkbox" id="opt-etc" name="オプション[]" value="ETC"><label for="opt-etc" style="font-weight:normal; display:inline;">ETC</label><br>
-          <input type="checkbox" id="opt-navi" name="オプション[]" value="カーナビ"><label for="opt-navi" style="font-weight:normal; display:inline;">カーナビ</label><br>
-          <input type="checkbox" id="opt-none" name="オプション[]" value="全て加入しない"><label for="opt-none" style="font-weight:normal; display:inline;">【全て加入しない】</label>
+      <div class="form-step" data-step="4">
+        <div class="form-group"><label>オプション <span style="color:red">*</span></label>
+          <label class="switch"><input type="checkbox" id="opt-insurance" name="オプション[]" value="車両保険"><span class="slider"></span></label>車両保険
+          <label class="switch"><input type="checkbox" id="opt-waiver" name="オプション[]" value="免責補償"><span class="slider"></span></label>免責補償
+          <label class="switch"><input type="checkbox" id="opt-tire" name="オプション[]" value="スタッドレスタイヤ"><span class="slider"></span></label>スタッドレスタイヤ
+          <label class="switch"><input type="checkbox" id="opt-etc" name="オプション[]" value="ETC"><span class="slider"></span></label>ETC
+          <label class="switch"><input type="checkbox" id="opt-navi" name="オプション[]" value="カーナビ"><span class="slider"></span></label>カーナビ
+          <label class="switch"><input type="checkbox" id="opt-none" name="オプション[]" value="全て加入しない"><span class="slider"></span></label>全て加入しない
         </div>
         <p class="note">空き状況によりご案内不可のオプションもございます。<br>スタッドレスタイヤは12月～3月の間、必須オプションとなります。ご契約途中での加入は出来かねます。ご注意ください。</p>
-        <div class="button-group">
-          <button type="button" class="btn-prev">戻る</button>
-          <button type="button" class="btn-next" disabled>次へ</button>
-        </div>
+        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
+
       <!-- Step 5 -->
-      <div class="form-step">
+      <div class="form-step" data-step="5">
+        <div class="form-group"><label for="start-date">ご利用開始日 <span style="color:red">*</span></label><input type="date" id="start-date" name="ご利用開始日" required></div>
+        <p class="note">営業時間 平日 9:00〜18:00（水曜除く）／土日 10:00〜16:00（定休日：水・祝日）</p>
         <div class="form-group">
-          <label for="start-date">ご利用開始日 <span style="color:red">*</span></label>
-          <input type="date" id="start-date" name="ご利用開始日" required>
-          <p class="note">営業時間 平日 9:00〜18:00（水曜除く）／土日 10:00〜16:00（定休日：水・祝日）</p>
-        </div>
-        <div class="form-group">
-          <label for="days">ご利用日数 <span style="color:red">*</span></label>
-          <input type="number" id="days" name="ご利用日数" min="7" value="7" required>
+          <label>ご利用日数 <span style="color:red">*</span></label>
+          <div class="day-picker">
+            <button type="button" id="days-decrease">-</button>
+            <input type="hidden" id="days" name="ご利用日数" value="7">
+            <span id="days-value">7</span> 日
+            <button type="button" id="days-increase">+</button>
+          </div>
           <small class="note">最短ご利用日数は7日となります</small>
         </div>
-        <div class="form-group hidden" id="delivery-group">
+        <div class="form-group"><label>ご返却予定日</label><input type="text" id="return-date" readonly></div>
+        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
+      </div>
+
+      <!-- Step 5.5 -->
+      <div class="form-step" data-step="5.5" id="step5-5">
+        <div class="form-group">
           <label>配送サービス利用の有無 <span style="color:red">*</span></label>
-          <input type="radio" id="del-yes" name="配送サービス利用の有無" value="利用する"><label for="del-yes" style="font-weight:normal; display:inline;">利用する</label>
-          <input type="radio" id="del-no" name="配送サービス利用の有無" value="利用しない" checked><label for="del-no" style="font-weight:normal; display:inline;">利用しない</label>
+          <input type="radio" id="del-yes" name="配送サービス利用の有無" value="利用する"><label for="del-yes" style="display:inline; font-weight:normal;">利用する</label>
+          <input type="radio" id="del-no" name="配送サービス利用の有無" value="利用しない" checked><label for="del-no" style="display:inline; font-weight:normal;">利用しない</label>
           <p class="note">ご返却時はJBレンタカー石巻店への返却となります。</p>
         </div>
-        <div class="button-group">
-          <button type="button" class="btn-prev">戻る</button>
-          <button type="button" class="btn-next" disabled>次へ</button>
-        </div>
+        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
+
       <!-- Step 6 -->
-      <div class="form-step">
+      <div class="form-step" data-step="6">
         <p>運転者様に事故等が発生した場合に使用する連絡先</p>
         <div class="form-group"><label for="e-name">お名前 <span style="color:red">*</span></label><input type="text" id="e-name" name="緊急連絡先_お名前" required></div>
         <div class="form-group"><label for="e-name-kana">お名前（フリガナ） <span style="color:red">*</span></label><input type="text" id="e-name-kana" name="緊急連絡先_お名前（フリガナ）" required></div>
@@ -143,50 +141,66 @@
         <div class="form-group"><label for="e-relation">ご関係 <span style="color:red">*</span></label><input type="text" id="e-relation" name="緊急連絡先_ご関係" required><small class="note">家族・友人・同僚など</small></div>
         <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
+
       <!-- Step 7 -->
-      <div class="form-step">
+      <div class="form-step" data-step="7">
         <div id="terms-personal">
-          <div class="form-group"><input type="checkbox" id="t1" name="お支払方法_personal" value="クレジットカードのみ" required><label for="t1" style="font-weight:normal; display:inline;">お支払方法は、原則クレジットカードのみとなります。（お持ちでない方は事前にご連絡ください。）</label></div>
-          <div class="form-group"><input type="checkbox" id="t2" name="注意事項_personal" value="空車状況により案内不可" required><label for="t2" style="font-weight:normal; display:inline;">ご申請頂いた場合でも、車両空き状況により、ご案内できない場合がございます。</label></div>
+          <div class="form-group"><input type="checkbox" id="t1" name="お支払方法_personal" value="クレジットカードのみ" required><label for="t1" style="display:inline; font-weight:normal;">お支払方法は、原則クレジットカードのみとなります。（お持ちでない方は事前にご連絡ください。）</label></div>
+          <div class="form-group"><input type="checkbox" id="t2" name="注意事項_personal" value="空車状況により案内不可" required><label for="t2" style="display:inline; font-weight:normal;">ご申請頂いた場合でも、車両空き状況により、ご案内できない場合がございます。</label></div>
         </div>
         <div id="terms-corporate">
-          <div class="form-group"><label>お支払方法 <span style="color:red">*</span></label><input type="radio" name="お支払方法_corporate" value="銀行振込（前日まで）" required><label style="font-weight:normal; display:inline;">前日までに銀行振込（前日が土日祝日の場合、前金融機関営業日まで）</label><br><input type="radio" name="お支払方法_corporate" value="現金"><label style="font-weight:normal; display:inline;">お引渡し日 現金支払い</label><br><input type="radio" name="お支払方法_corporate" value="カード"><label style="font-weight:normal; display:inline;">お引渡し日 カード決済</label></div>
-          <div class="form-group"><input type="checkbox" id="corp-seal" name="注意事項_corporate" value="印鑑証明書必要"><label for="corp-seal" style="font-weight:normal; display:inline;">場合により、法人印鑑証明書等のご提出を求める場合がございます。</label></div>
-          <div class="form-group"><input type="checkbox" id="corp-note" name="注意事項_corporate" value="空車状況により案内不可" required><label for="corp-note" style="font-weight:normal; display:inline;">ご申請頂いた場合でも、車両空き状況により、ご案内できない場合がございます。</label></div>
+          <div class="form-group"><label>お支払方法 <span style="color:red">*</span></label><input type="radio" name="お支払方法_corporate" value="銀行振込（前日まで）" required><label style="display:inline; font-weight:normal;">前日までに銀行振込（前日が土日祝日の場合、前金融機関営業日まで）</label><br><input type="radio" name="お支払方法_corporate" value="現金"><label style="display:inline; font-weight:normal;">お引渡し日 現金支払い</label><br><input type="radio" name="お支払方法_corporate" value="カード"><label style="display:inline; font-weight:normal;">お引渡し日 カード決済</label></div>
+          <div class="form-group"><input type="checkbox" id="corp-seal" name="注意事項_corporate" value="印鑑証明書必要"><label for="corp-seal" style="display:inline; font-weight:normal;">場合により、法人印鑑証明書等のご提出を求める場合がございます。</label></div>
+          <div class="form-group"><input type="checkbox" id="corp-note" name="注意事項_corporate" value="空車状況により案内不可" required><label for="corp-note" style="display:inline; font-weight:normal;">ご申請頂いた場合でも、車両空き状況により、ご案内できない場合がございます。</label></div>
         </div>
         <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="submit">送信する</button></div>
       </div>
+
     </form>
   </div>
   <script>
   (function(){
-    const steps = document.querySelectorAll('.form-step');
-    const nexts = document.querySelectorAll('.btn-next');
-    const prevs = document.querySelectorAll('.btn-prev');
-    const prog  = document.querySelector('.progress-inner');
-    const days  = document.getElementById('days');
-    const del   = document.getElementById('delivery-group');
-    let idx = 0;
-    function updProg(){ prog.style.width = (idx/(steps.length-1)*100)+'%'; }
-    function updNext(){ const ins=[...steps[idx].querySelectorAll('input,select,textarea')]; nexts[idx].disabled = !ins.every(i=>i.disabled||i.checkValidity()); }
-    function show(i){ steps.forEach((s,j)=>s.classList.toggle('active',j===i)); updProg();
-      if(i===1){ const corp=document.getElementById('use-corporate').checked;
-        document.getElementById('personal-info').style.display=corp?'none':'block';
-        document.getElementById('corporate-info').style.display=corp?'block':'none';
-        document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea').forEach(e=>e.disabled=corp);
-        document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea').forEach(e=>e.disabled=!corp);
-      }
-      if(i===4){ del.classList.toggle('hidden', parseInt(days.value,10)<30); }
-      if(i===steps.length-1){ const corp=document.getElementById('use-corporate').checked;
-        document.getElementById('terms-personal').style.display=corp?'none':'block';
-        document.getElementById('terms-corporate').style.display=corp?'block':'none';
-        document.querySelectorAll('#terms-personal input').forEach(e=>e.disabled=corp);
-        document.querySelectorAll('#terms-corporate input').forEach(e=>e.disabled=!corp);
-      }
-      updNext(); }
-    steps.forEach(s=>s.querySelectorAll('input,select,textarea').forEach(e=>{ e.addEventListener('input',updNext); e.addEventListener('change',updNext); }));
-    nexts.forEach((b,i)=>b.addEventListener('click',()=>{ updNext(); if(!b.disabled&&i<steps.length-1){ idx=i+1; show(idx);} }));
-    prevs.forEach(b=>b.addEventListener('click',()=>{ if(idx>0){ idx--; show(idx);} }));
+    const steps=document.querySelectorAll('.form-step');
+    const nexts=document.querySelectorAll('.btn-next');
+    const prevs=document.querySelectorAll('.btn-prev');
+    const prog=document.querySelector('.progress-inner');
+    const daysInput=document.getElementById('days');
+    const daysVal=document.getElementById('days-value');
+    const retDate=document.getElementById('return-date');
+    const step5_5=document.getElementById('step5-5');
+    const delGroup=document.getElementById('step5-5');
+    const increase=document.getElementById('days-increase');
+    const decrease=document.getElementById('days-decrease');
+    const pZip=document.getElementById('p-zip');
+    const cZip=document.getElementById('c-zip');
+    const pAddress=document.getElementById('p-address');
+    const cAddress=document.getElementById('c-address');
+    const pLicense=document.getElementById('p-license');
+    let idx=0;
+    function updateProgress(){ prog.style.width=(idx/(steps.length-1)*100)+'%;'; }
+    function updateNext(){ const ins=[...steps[idx].querySelectorAll('input,select,textarea')]; nexts[idx].disabled=!ins.every(i=>i.disabled||i.checkValidity()); }
+    function calcReturn(){ const sd=document.getElementById('start-date').value; const days=+daysInput.value; if(sd){ const d=new Date(sd); d.setDate(d.getDate()+days); retDate.value=d.toISOString().slice(0,10);} }
+    function show(i){ steps.forEach((s,j)=>s.classList.toggle('active',j===i)); updateProgress();
+      if(i===1){ const corp=document.getElementById('use-corporate').checked;['personal','corporate'].forEach(t=>document.getElementById(t+'-info').style.display=(t==='personal'?!corp:corp)?'block':'none'); const persEls=document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea'); persEls.forEach(e=>e.disabled=corp); const corpEls=document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea'); corpEls.forEach(e=>e.disabled=!corp);}      
+      if(i===4){ calcReturn(); if(+daysInput.value>=30) step5_5.style.display='block'; else step5_5.style.display='none'; }
+      if(i===5 && +daysInput.value<30){ idx=6; show(idx); return;}      
+      if(i===steps.length-1){ const corp=document.getElementById('use-corporate').checked; document.getElementById('terms-personal').style.display=corp?'none':'block'; document.getElementById('terms-corporate').style.display=corp?'block':'none'; document.querySelectorAll('#terms-personal input').forEach(e=>e.disabled=corp); document.querySelectorAll('#terms-corporate input').forEach(e=>e.disabled=!corp);}      
+      updateNext(); }
+    // events
+    steps.forEach(s=>s.querySelectorAll('input,select,textarea').forEach(e=>{ e.addEventListener('input',updateNext); e.addEventListener('change',updateNext);}));
+    increase.addEventListener('click',()=>{ let v=+daysInput.value; daysInput.value=v+1; daysVal.textContent=daysInput.value; calcReturn(); updateNext();});
+    decrease.addEventListener('click',()=>{ let v=+daysInput.value; if(v>7) daysInput.value=v-1; daysVal.textContent=daysInput.value; calcReturn(); updateNext();});
+    // zip auto strip & API
+    [pZip,cZip].forEach(z=>{ z.addEventListener('input',()=>{ z.value=z.value.replace(/[^0-9]/g,''); }); z.addEventListener('blur',()=>{ fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode='+z.value).then(r=>r.json()).then(j=>{ if(j.results){ const addr=j.results[0].address1+j.results[0].address2+j.results[0].address3; (z===pZip?pAddress:cAddress).value=addr; }}); }); });
+    // license validation
+    pLicense.addEventListener('input',()=>{ if(pLicense.value.length>0&&pLicense.value.length!==12){ pLicense.setCustomValidity('12ケタの数字を入力してください'); } else pLicense.setCustomValidity(''); pLicense.reportValidity(); });
+    // option exclusive
+    const optNone=document.getElementById('opt-none'); const others=[document.getElementById('opt-insurance'),document.getElementById('opt-waiver'),document.getElementById('opt-tire'),document.getElementById('opt-etc'),document.getElementById('opt-navi')];
+    optNone.addEventListener('change',()=>{ if(optNone.checked) others.forEach(o=>{ o.checked=false; }); updateNext(); });
+    others.forEach(o=>o.addEventListener('change',()=>{ if(o.checked) optNone.checked=false; updateNext(); }));
+    // navigation
+    nexts.forEach((b,i)=>b.addEventListener('click',()=>{ updateNext(); if(!b.disabled){ if(i===4){ idx=(+daysInput.value>=30?5:6); } else idx=i+1; show(idx);} }));
+    prevs.forEach(b=>b.addEventListener('click',()=>{ if(idx>0){ idx--; if(idx===5&&+daysInput.value<30) idx=4; show(idx);} }));
     show(0);
   })();
   </script>
