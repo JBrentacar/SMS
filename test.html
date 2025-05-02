@@ -42,10 +42,10 @@
   margin-right: 0.5rem; /* ボタン同士の間隔 */
   margin-bottom: 0.5rem; /* 折り返し後にも余白 */
 }
-/* ステップ4 のオプション群 */
-.form-step[data-step="4"] .switch {
-  display: block;
-  margin-bottom: 0.75rem; /* 上下の余白を少し開ける */
+/* ステップ4がアクティブなときだけ */
+.form-step.active[data-step="4"] .switch {
+  display: block !important;
+  margin-bottom: 0.75rem;
 }
 
     
@@ -393,12 +393,11 @@
       daysVal.textContent = '7';
       calcReturn();
     }
-     if (i === 6) {
-    const isCorp = document.getElementById('use-corporate').checked;
-    // #terms-personal, #terms-corporate は CSS で初期 display:none なので
-    document.getElementById('terms-personal').style.display = isCorp ? 'none'  : 'block';
-    document.getElementById('terms-corporate').style.display = isCorp ? 'block' : 'none';
-  }
+   if (i === 7) {
+       const isCorp = document.getElementById('use-corporate').checked;
+       document.getElementById('terms-personal').style.display  = isCorp ? 'none'  : 'block';
+       document.getElementById('terms-corporate').style.display = isCorp ? 'block' : 'none';
+     }
 
     updateNext();
   }
