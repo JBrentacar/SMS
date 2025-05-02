@@ -199,7 +199,7 @@
   const delTimeGrp = document.getElementById('delivery-time-group');
   const delTimeSel = document.getElementById('delivery-time-select');
 
-  // 日数増減ボタン（IDを正しく合わせています）
+  // 日数増減ボタン（ID注意！）
   const decrease  = document.getElementById('days-decrease');
   const increase  = document.getElementById('days-increase');
 
@@ -276,7 +276,7 @@
         .forEach(e=> e.disabled = !isCorp);
     }
 
-    // まず5.5 は全部隠す
+    // まず5.5は全部隠す
     step55.style.display = 'none';
     [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
 
@@ -293,18 +293,11 @@
       }
     }
 
-    // ステップ5 で 7日未満なら丸め
+    // Step5 で7日未満なら丸め
     if(i===4 && +daysInput.value < 7){
       daysInput.value = 7;
       daysVal.textContent = '7';
       calcReturn();
-    }
-
-    // スキップ（5→6）
-    if(i===5 && +daysInput.value < 30){
-      idx = 6;
-      show(idx);
-      return;
     }
 
     updateNext();
@@ -332,7 +325,7 @@
     }
   });
 
-  // 郵便番号API, 免許番号バリデーション, オプション排他制御
+  // 郵便番号API → 住所自動入力
   [pZip,cZip].forEach(z=>{
     if(!z) return;
     z.addEventListener('input', ()=> z.value = z.value.replace(/\D/g,''));
@@ -347,6 +340,8 @@
         });
     });
   });
+
+  // 免許証12桁バリデーション
   if(pLicense){
     pLicense.addEventListener('input', ()=>{
       if(pLicense.value && pLicense.value.length!==12) pLicense.setCustomValidity('12ケタで入力してください');
@@ -354,15 +349,20 @@
       pLicense.reportValidity();
     });
   }
+
+  // オプション排他制御
   if(optNone){
     optNone.addEventListener('change', ()=>{ if(optNone.checked) others.forEach(o=>o.checked=false); updateNext(); });
   }
   others.forEach(o=>{
     if(!o) return;
-    o.addEventListener('change', ()=>{ if(o.checked) optNone.checked=false; updateNext(); });
+    o.addEventListener('change', ()=>{
+      if(o.checked) optNone.checked = false;
+      updateNext();
+    });
   });
 
-  // 配送サービス選択／配送場所選択
+  // 配送サービス選択
   document.getElementById('del-yes').addEventListener('change', ()=>{
     locGrp.classList.remove('hidden');
     delTimeGrp.classList.remove('hidden');
@@ -374,15 +374,17 @@
     populateVisitTimes();
     updateNext();
   });
+
+  // 配送場所選択
   document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
   document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
 
-  // 次へ／戻る
+  // 「次へ／戻る」ナビ
   nexts.forEach((btn,i)=>{
     btn.addEventListener('click', ()=>{
       if(btn.disabled) return;
-      if(i===4)      idx = 5;
-      else if(i===5) idx = 6;
+      if(i===4)      idx = 5;  // Step5→Step5.5
+      else if(i===5) idx = 6;  // Step5.5→Step6
       else            idx = i+1;
       show(idx);
     });
@@ -401,6 +403,7 @@
 
 })();
 </script>
+
 
 
 </body>
