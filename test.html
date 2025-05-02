@@ -17,7 +17,7 @@
     input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
       width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;
     }
-    .day-picker { display:flex; align-items:center; }
+    .day-picker { display:flex; align-items:center; margin-bottom:15px; }
     .day-picker button { width:32px; height:32px; margin:0 8px; }
     .day-picker #days-value { width:40px; text-align:center; }
     input[readonly] { background:#f5f5f5; }
@@ -29,7 +29,6 @@
     .hidden { display:none; }
     /* initial hide */
     #personal-info, #corporate-info, #terms-personal, #terms-corporate { display:none; }
-    /* toggle switch */
     .switch { position:relative; display:inline-block; width:40px; height:20px; margin-right:8px; }
     .switch input { opacity:0; width:0; height:0; }
     .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:20px; transition:.2s; }
@@ -107,68 +106,50 @@
         <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
 
-      <!-- Step 5 -->
-<div class="form-step" data-step="5">
-  <div class="form-group">
-    <label for="start-date">ご利用開始日 *</label>
-    <input type="date" id="start-date" name="ご利用開始日" required>
-  </div>
-  <div class="day-picker">
-    <button type="button" id="days-decrease">-</button>
-    <input type="hidden" id="days" name="ご利用日数" value="30">
-    <span id="days-value">30</span> 日
-    <button type="button" id="days-increase">+</button>
-  </div>
-  <div class="form-group">
-    <label>ご返却予定日</label>
-    <input type="text" id="return-date" readonly>
-  </div>
-  <div class="button-group">
-    <button type="button" class="btn-prev">戻る</button>
-    <button type="button" class="btn-next" disabled>次へ</button>
-  </div>
-</div>
+     <!-- Step 5 -->
+      <div class="form-step" data-step="5">
+        <div class="form-group"><label for="start-date">ご利用開始日 <span style="color:red">*</span></label><input type="date" id="start-date" name="ご利用開始日" required></div>
+        <div class="day-picker">
+          <button type="button" id="days-decrease">-</button>
+          <input type="hidden" id="days" name="ご利用日数" value="7">
+          <span id="days-value">7</span> 日
+          <button type="button" id="days-increase">+</button>
+        </div>
+        <div class="form-group"><label>ご返却予定日</label><input type="text" id="return-date" readonly></div>
+        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
+      </div>
 
       <!-- Step 5.5 -->
       <div class="form-step" data-step="5.5" id="step5-5">
-        <!-- days<30: visit-time-group -->
+        <!-- 来店時刻 -->
         <div id="visit-time-group" class="form-group hidden">
           <label>ご来店予定時刻 <span style="color:red">*</span></label>
-          <select name="来店予定時刻" id="visit-time-select" required>
-            <!-- Options will be populated by JS -->
-          </select>
+          <select id="visit-time-select" name="来店予定時刻" required></select>
           <p class="note">営業時間 平日 9:00〜18:00（水曜除く）／土日 10:00〜16:00（定休日：水・祝日）</p>
         </div>
-
-        <!-- days>=30: delivery-service-group -->
+        <!-- 配送サービス -->
         <div id="delivery-service-group" class="form-group hidden">
           <label>配送サービス利用の有無 <span style="color:red">*</span></label>
-          <input type="radio" id="del-yes" name="配送サービス利用の有無" value="利用する"><label for="del-yes" style="display:inline; font-weight:normal;">利用する</label>
-          <input type="radio" id="del-no" name="配送サービス利用の有無" value="利用しない" checked><label for="del-no" style="display:inline; font-weight:normal;">利用しない</label>
+          <input type="radio" id="del-yes" name="配送サービス利用の有無" value="利用する"><label for="del-yes" style="font-weight:normal; display:inline;">利用する</label>
+          <input type="radio" id="del-no"  name="配送サービス利用の有無" value="利用しない" checked><label for="del-no"  style="font-weight:normal; display:inline;">利用しない</label>
         </div>
-
-        <!-- delivery service: location choice -->
+        <!-- 配送場所 -->
         <div id="location-group" class="form-group hidden">
           <label>配送場所 <span style="color:red">*</span></label>
-          <input type="radio" id="loc-same" name="配送場所" value="same" checked><label for="loc-same" style="display:inline; font-weight:normal;">住所と同じ</label>
-          <input type="radio" id="loc-different" name="配送場所" value="different"><label for="loc-different" style="display:inline; font-weight:normal;">住所と異なる</label>
+          <input type="radio" id="loc-same"     name="配送場所" value="same" checked><label for="loc-same"     style="font-weight:normal; display:inline;">住所と同じ</label>
+          <input type="radio" id="loc-different"name="配送場所" value="different"><label for="loc-different"style="font-weight:normal; display:inline;">住所と異なる</label>
         </div>
         <div id="delivery-address-group" class="form-group hidden">
           <label for="delivery-address">配送先 <span style="color:red">*</span></label>
           <input type="text" id="delivery-address" name="配送先">
         </div>
-
-        <!-- delivery time selection -->
+        <!-- 配送時間 -->
         <div id="delivery-time-group" class="form-group hidden">
           <label>ご配送希望時間 <span style="color:red">*</span></label>
-          <select name="配送希望時間" id="delivery-time-select">
-            <!-- Options populated by JS -->
-          </select>
+          <select id="delivery-time-select" name="配送希望時間"></select>
         </div>
-
         <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
-
 
       <!-- Step 6 -->
       <div class="form-step" data-step="6">
@@ -196,252 +177,226 @@
 
     </form>
   </div>
-<script>
-(function(){
-  // 各ステップ要素、ナビボタン、プログレスバー
-  const steps      = document.querySelectorAll('.form-step');
-  const nexts      = document.querySelectorAll('.btn-next');
-  const prevs      = document.querySelectorAll('.btn-prev');
-  const prog       = document.querySelector('.progress-inner');
+  <script>
+  (function(){
+    const steps     = document.querySelectorAll('.form-step');
+    const nexts     = document.querySelectorAll('.btn-next');
+    const prevs     = document.querySelectorAll('.btn-prev');
+    const prog      = document.querySelector('.progress-inner');
+    const daysInput = document.getElementById('days');
+    const daysVal   = document.getElementById('days-value');
+    const retDate   = document.getElementById('return-date');
+    const step5_5   = document.getElementById('step5-5');
 
-  // ステップ5関連
-  const daysInput  = document.getElementById('days');
-  const daysVal    = document.getElementById('days-value');
-  const retDate    = document.getElementById('return-date');
+    // Step5.5用要素
+    const visitGrp   = document.getElementById('visit-time-group');
+    const visitSel   = document.getElementById('visit-time-select');
+    const delSvcGrp  = document.getElementById('delivery-service-group');
+    const locGrp     = document.getElementById('location-group');
+    const addrGrp    = document.getElementById('delivery-address-group');
+    const delTimeGrp = document.getElementById('delivery-time-group');
+    const delTimeSel = document.getElementById('delivery-time-select');
 
-  // ステップ5.5全体 container
-  const step55     = document.getElementById('step5-5');
+    // 日数ボタン
+    const increase = document.getElementById('days-increase');
+    const decrease = document.getElementById('days-decrease');
 
-  // ステップ5.5中の各グループ
-  const visitGrp   = document.getElementById('visit-time-group');
-  const visitSel   = document.getElementById('visit-time-select');
-  const delSvcGrp  = document.getElementById('delivery-service-group');
-  const locGrp     = document.getElementById('location-group');
-  const addrGrp    = document.getElementById('delivery-address-group');
-  const delTimeGrp = document.getElementById('delivery-time-group');
-  const delTimeSel = document.getElementById('delivery-time-select');
+    // 既存API・バリデーション用要素
+    const pZip     = document.getElementById('p-zip');
+    const cZip     = document.getElementById('c-zip');
+    const pAddr    = document.getElementById('p-address');
+    const cAddr    = document.getElementById('c-address');
+    const pLic     = document.getElementById('p-license');
+    const optNone  = document.getElementById('opt-none');
+    const others   = [
+      document.getElementById('opt-insurance'),
+      document.getElementById('opt-waiver'),
+      document.getElementById('opt-tire'),
+      document.getElementById('opt-etc'),
+      document.getElementById('opt-navi')
+    ];
 
-  // 日数増減ボタン
-  const increase   = document.getElementById('days-increase');
-  const decrease   = document.getElementById('days-decrease');
+    let idx = 0;
 
-  // その他既存要素（郵便番号API、免許番号、オプションなど）
-  const pZip       = document.getElementById('p-zip');
-  const cZip       = document.getElementById('c-zip');
-  const pAddress   = document.getElementById('p-address');
-  const cAddress   = document.getElementById('c-address');
-  const pLicense   = document.getElementById('p-license');
-  const optNone    = document.getElementById('opt-none');
-  const others     = [
-    document.getElementById('opt-insurance'),
-    document.getElementById('opt-waiver'),
-    document.getElementById('opt-tire'),
-    document.getElementById('opt-etc'),
-    document.getElementById('opt-navi')
-  ];
-
-  let idx = 0;
-
-  // プログレスバー更新
-  function updateProgress(){
-    prog.style.width = (idx / (steps.length - 1) * 100) + '%';
-  }
-
-  // 次へボタン有効化判定
-  function updateNext(){
-    const ins = Array.from(steps[idx].querySelectorAll('input,select,textarea'));
-    nexts[idx].disabled = !ins.every(i => i.disabled || i.checkValidity());
-  }
-
-  // 返却予定日計算
-  function calcReturn(){
-    const sd = document.getElementById('start-date').value;
-    const days = +daysInput.value;
-    if(sd){
-      const d = new Date(sd);
-      d.setDate(d.getDate() + days);
-      retDate.value = d.toISOString().slice(0,10);
+    function updateProgress(){
+      prog.style.width = (idx/(steps.length-1)*100) + '%';
     }
-  }
-
-  // 来店時刻オプション生成（15分刻み）
-  function populateVisitTimes(){
-    visitSel.innerHTML = '';
-    const sdVal = document.getElementById('start-date').value;
-    const d = sdVal ? new Date(sdVal) : new Date();
-    const day = d.getDay(); // 0:日曜,1~5:平日,6:土曜
-    const startH = (day>=1 && day<=5) ? 9   : 10;
-    const endH   = (day>=1 && day<=5) ? 17.5: 15.5;
-    for(let t = startH; t < endH; t += 0.25){
-      const hh  = Math.floor(t),
-            mm  = Math.round((t - hh) * 60),
-            t2  = t + 0.25,
-            hh2 = Math.floor(t2),
-            mm2 = Math.round((t2 - hh2) * 60),
-            txt = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}〜${String(hh2).padStart(2,'0')}:${String(mm2).padStart(2,'0')}`;
-      visitSel.insertAdjacentHTML('beforeend', `<option value="${txt}">${txt}</option>`);
+    function updateNext(){
+      const fields = Array.from(steps[idx].querySelectorAll('input,select,textarea'));
+      nexts[idx].disabled = !fields.every(f=> f.disabled || f.checkValidity());
     }
-  }
-
-  // 配送希望時間生成（30分刻み）
-  function populateDeliveryTimes(){
-    delTimeSel.innerHTML = '';
-    for(let h = 10; h < 17; h++){
-      const o1 = `${String(h).padStart(2,'0')}:00〜${String(h).padStart(2,'0')}:30`;
-      const o2 = `${String(h).padStart(2,'0')}:30〜${String(h+1).padStart(2,'0')}:00`;
-      delTimeSel.insertAdjacentHTML('beforeend', `<option value="${o1}">${o1}</option>`);
-      delTimeSel.insertAdjacentHTML('beforeend', `<option value="${o2}">${o2}</option>`);
-    }
-  }
-
-  // ステップ表示切り替え
-  function show(i){
-    // 1) アクティブステップ切り替え
-    steps.forEach((s,j)=> s.classList.toggle('active', j===i));
-    updateProgress();
-
-    // 2) Step5.5全要素隠す
-    step55.style.display = 'none';
-    [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=> el.classList.add('hidden'));
-
-    // 3) 個人/法人切替（省略。前のまま残してください）
-
-    // 4) ステップ5.5表示＆中身切替
-    if(i === 5){
-      step55.style.display = 'block';
+    function calcReturn(){
+      const sd = document.getElementById('start-date').value;
       const days = +daysInput.value;
-      if(days < 30){
-        // 7～29日→来店時刻のみ
-        visitGrp.classList.remove('hidden');
-        populateVisitTimes();
-      } else {
-        // 30日以上→配送サービス問う
-        delSvcGrp.classList.remove('hidden');
-        populateDeliveryTimes();
+      if(sd){
+        const d = new Date(sd);
+        d.setDate(d.getDate()+days);
+        retDate.value = d.toISOString().slice(0,10);
+      }
+    }
+    function populateVisitTimes(){
+      visitSel.innerHTML = '';
+      const sd  = document.getElementById('start-date').value;
+      const d   = sd? new Date(sd): new Date();
+      const day = d.getDay();
+      const startH = (day>=1&&day<=5)?9:10;
+      const endH   = (day>=1&&day<=5)?17.5:15.5;
+      for(let t=startH;t<endH;t+=0.25){
+        const hh = Math.floor(t), mm = (t-hh)*60;
+        const t2 = t+0.25, hh2 = Math.floor(t2), mm2 = (t2-hh2)*60;
+        const txt = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}〜${String(hh2).padStart(2,'0')}:${String(mm2).padStart(2,'0')}`;
+        visitSel.insertAdjacentHTML('beforeend', `<option value="${txt}">${txt}</option>`);
+      }
+    }
+    function populateDeliveryTimes(){
+      delTimeSel.innerHTML = '';
+      for(let h=10;h<17;h++){
+        const o1 = `${String(h).padStart(2,'0')}:00〜${String(h).padStart(2,'0')}:30`;
+        const o2 = `${String(h).padStart(2,'0')}:30〜${String(h+1).padStart(2,'0')}:00`;
+        delTimeSel.insertAdjacentHTML('beforeend', `<option>${o1}</option><option>${o2}</option>`);
       }
     }
 
-    // 5) ステップ５で7日未満入力した場合は自動７日に丸め
-    if(i===4 && +daysInput.value < 7){
-      daysInput.value = 7;
-      daysVal.textContent = 7;
-      calcReturn();
-    }
+    function show(i){
+      steps.forEach((s,j)=> s.classList.toggle('active',j===i));
+      updateProgress();
+      // 一旦5.5を全部隠す
+      step5_5.style.display='none';
+      [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
 
-    updateNext();
-  }
-
-  // 初回バリデーション／イベント登録
-  steps.forEach(step=>{
-    step.querySelectorAll('input,select,textarea').forEach(el=>{
-      el.addEventListener('input', updateNext);
-      el.addEventListener('change', updateNext);
-    });
-  });
-
-  // 日数増減ボタン
-  increase.addEventListener('click', ()=>{
-    daysInput.value = +daysInput.value + 1;
-    daysVal.textContent = daysInput.value;
-    calcReturn();
-    updateNext();
-  });
-  decrease.addEventListener('click', ()=>{
-    if(+daysInput.value > 7){
-      daysInput.value = +daysInput.value - 1;
-      daysVal.textContent = daysInput.value;
-      calcReturn();
-      updateNext();
-    }
-  });
-
-  // 郵便番号API連携＋数字以外除去
-  [pZip,cZip].forEach(z=>{
-    if(!z) return;
-    z.addEventListener('input', ()=> z.value = z.value.replace(/[^0-9]/g,''));
-    z.addEventListener('blur', ()=>{
-      fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
-        .then(r=>r.json()).then(j=>{
-          if(j.results){
-            const adr = j.results[0].address1 + j.results[0].address2 + j.results[0].address3;
-            (z===pZip? pAddress : cAddress).value = adr;
-          }
-        });
-    });
-  });
-
-  // 免許番号12桁チェック
-  if(pLicense){
-    pLicense.addEventListener('input', ()=>{
-      if(pLicense.value && pLicense.value.length!==12){
-        pLicense.setCustomValidity('12ケタの数字を入力してください');
-      } else {
-        pLicense.setCustomValidity('');
+      // Step2: 個人/法人切替
+      if(i===1){
+        const isCorp = document.getElementById('use-corporate').checked;
+        document.getElementById('personal-info').style.display  = isCorp?'none':'block';
+        document.getElementById('corporate-info').style.display = isCorp?'block':'none';
+        document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea')
+          .forEach(e=>e.disabled=isCorp);
+        document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea')
+          .forEach(e=>e.disabled=!isCorp);
       }
-      pLicense.reportValidity();
-    });
-  }
 
-  // オプション「全て加入しない」排他制御
-  if(optNone){
-    optNone.addEventListener('change', ()=>{
-      if(optNone.checked) others.forEach(o=> o.checked=false);
-      updateNext();
-    });
-  }
-  others.forEach(o=>{
-    if(!o) return;
-    o.addEventListener('change', ()=>{
-      if(o.checked) optNone.checked = false;
-      updateNext();
-    });
-  });
-
-  // 配送サービスラジオ切替
-  document.getElementById('del-yes').addEventListener('change', ()=>{
-    locGrp.classList.remove('hidden');
-    delTimeGrp.classList.remove('hidden');
-    if(document.getElementById('loc-different').checked){
-      addrGrp.classList.remove('hidden');
-    }
-  });
-  document.getElementById('del-no').addEventListener('change', ()=>{
-    visitGrp.classList.remove('hidden');
-    populateVisitTimes();
-  });
-
-  // 配送場所ラジオ切替
-  document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
-  document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
-
-  // 「次へ／戻る」ナビ
-  nexts.forEach((btn,i)=>{
-    btn.addEventListener('click', ()=>{
-      if(btn.disabled) return;
-      // ステップ5からは必ず 5→5.5
-      if(i === 4){
-        idx = 5;
-      } else {
-        idx = i + 1;
+      // Step5.5 表示切替
+      if(i===5){
+        step5_5.style.display='block';
+        const days = +daysInput.value;
+        if(days<30){
+          visitGrp.classList.remove('hidden');
+          populateVisitTimes();
+        } else {
+          delSvcGrp.classList.remove('hidden');
+          populateDeliveryTimes();
+        }
       }
-      show(idx);
+
+      // 7日未満は丸め
+      if(i===4 && +daysInput.value<7){
+        daysInput.value=7; daysVal.textContent=7; calcReturn();
+      }
+
+      // スキップ（5→6）
+      if(i===5 && +daysInput.value<30){
+        idx=6; show(idx); return;
+      }
+
+      updateNext();
+    }
+
+    // 初期バリデーション登録
+    steps.forEach(step=>{
+      step.querySelectorAll('input,select,textarea').forEach(el=>{
+        el.addEventListener('input', updateNext);
+        el.addEventListener('change', updateNext);
+      });
     });
-  });
-  prevs.forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      if(idx > 0){
-        idx--;
+
+    // 日数増減
+    increase.addEventListener('click', ()=>{
+      daysInput.value=+daysInput.value+1; daysVal.textContent=daysInput.value; calcReturn(); updateNext();
+    });
+    decrease.addEventListener('click', ()=>{
+      if(+daysInput.value>7){
+        daysInput.value=+daysInput.value-1; daysVal.textContent=daysInput.value; calcReturn(); updateNext();
+      }
+    });
+
+    // 郵便番号API & 数字以外削除
+    [pZip,cZip].forEach(z=>{
+      if(!z) return;
+      z.addEventListener('input', ()=> z.value=z.value.replace(/[^0-9]/g,''));
+      z.addEventListener('blur', ()=>{
+        fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
+          .then(r=>r.json()).then(j=>{
+            if(j.results){
+              const a = j.results[0];
+              const addr = a.address1 + a.address2 + a.address3;
+              (z===pZip? pAddr: cAddr).value = addr;
+            }
+          });
+      });
+    });
+
+    // 免許証12桁チェック
+    if(pLic){
+      pLic.addEventListener('input', ()=>{
+        if(pLic.value && pLic.value.length!==12) pLic.setCustomValidity('12ケタの数字を入力してください');
+        else pLic.setCustomValidity('');
+        pLic.reportValidity();
+      });
+    }
+
+    // オプション排他
+    if(optNone){
+      optNone.addEventListener('change', ()=>{
+        if(optNone.checked) others.forEach(o=>o.checked=false);
+        updateNext();
+      });
+    }
+    others.forEach(o=>{
+      if(!o) return;
+      o.addEventListener('change', ()=>{
+        if(o.checked) optNone.checked=false;
+        updateNext();
+      });
+    });
+
+    // 配送サービス選択
+    document.getElementById('del-yes').addEventListener('change', ()=>{
+      locGrp.classList.remove('hidden');
+      delTimeGrp.classList.remove('hidden');
+      if(document.getElementById('loc-different').checked) addrGrp.classList.remove('hidden');
+    });
+    document.getElementById('del-no').addEventListener('change', ()=>{
+      // 配送関連全部隠す
+      [delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
+      // 来店時刻だけ出す
+      visitGrp.classList.remove('hidden');
+      populateVisitTimes();
+      updateNext();
+    });
+
+    // 配送場所選択
+    document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
+    document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
+
+    // 次へ／戻る
+    nexts.forEach((btn,i)=>{
+      btn.addEventListener('click', ()=>{
+        if(btn.disabled) return;
+        if(i===4) idx = 5; else idx = i+1;
         show(idx);
-      }
+      });
     });
-  });
+    prevs.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(idx>0){ idx--; show(idx); }
+      });
+    });
 
-  // 最初はステップ0を表示
-  show(0);
+    // 初期表示
+    show(0);
 
-})();
-</script>
-
+  })();
+  </script>
 
 </body>
 </html>
