@@ -257,8 +257,11 @@
       </div>
 
      <!-- Step 7 -->
+<!-- Step 7 -->
 <div class="form-step" data-step="7">
   <p class="note">内容をご確認頂き、□をタップしてチェックを入れてください。</p>
+
+  <!-- 個人用 -->
   <div id="terms-personal">
     <div class="form-group">
       <input type="checkbox" id="t1" name="お支払方法_personal" value="クレジットカードのみ" required>
@@ -269,15 +272,34 @@
       <label for="t2">ご申請頂いても空車状況により、ご案内できない場合があります。</label>
     </div>
   </div>
+
+  <!-- 法人用 -->
   <div id="terms-corporate">
-    <!-- 法人用ラジオ＆チェック群（既存） -->
+    <div class="form-group">
+      <label>お支払方法 <span style="color:red">*</span></label>
+      <input type="radio" id="corp-pay-bank"   name="お支払方法_corporate" value="銀行振込" required>
+      <label for="corp-pay-bank">銀行振込（前日まで）</label><br>
+      <input type="radio" id="corp-pay-cash"   name="お支払方法_corporate" value="現金">
+      <label for="corp-pay-cash">現金支払い</label><br>
+      <input type="radio" id="corp-pay-card"   name="お支払方法_corporate" value="カード">
+      <label for="corp-pay-card">カード決済</label>
+    </div>
+    <div class="form-group">
+      <input type="checkbox" id="corp-seal" name="注意事項_corporate" value="印鑑証明書必要">
+      <label for="corp-seal">場合により印鑑証明書等のご提出を求める場合がございます。</label>
+    </div>
+    <div class="form-group">
+      <input type="checkbox" id="corp-note" name="注意事項_corporate" value="空車状況により案内不可" required>
+      <label for="corp-note">ご申請頂いても空車状況により、ご案内できない場合があります。</label>
+    </div>
   </div>
+
   <div class="button-group">
     <button type="button" class="btn-prev">戻る</button>
-    <!-- 通常の submit をボタンに置き換え -->
     <button type="button" id="submit-btn" disabled>送信する</button>
   </div>
 </div>
+
 
 
     </form>
@@ -530,10 +552,33 @@
   });
 
   // 郵便番号API
-  [pZip,cZip].forEach(z=>{
-    if(!z) return;
-    z.addEventListener('input', ()=> z.value = z.value.replace(/\D/g,''));
-    z.add
+ // 郵便番号入力 → 住所自動補完
+[pZip, cZip].forEach(z => {
+  if (!z) return;
+  // 数字以外を消す
+  z.addEventListener('input', () => {
+    z.value = z.value.replace(/\D/g, '');
+  });
+  // フォーカスアウト時に API を叩く
+  z.addEventListener('blur', () => {
+    fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
+      .then(res => res.json())
+      .then(json => {
+        if (json.results && json.results[0]) {
+          const r = json.results[0];
+          const addr = r.address1 + r.address2 + r.address3;
+          // 個人用と法人用、それぞれの住所フィールドにセット
+          if (z === pZip) {
+            pAddress.value = addr;
+          } else {
+            cAddress.value = addr;
+          }
+        }
+      })
+      .catch(err => console.warn('郵便番号APIエラー', err));
+  });
+});
+
 
 </script>
 
