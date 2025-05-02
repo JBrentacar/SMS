@@ -578,9 +578,33 @@
       .catch(err => console.warn('郵便番号APIエラー', err));
   });
 });
+    // 郵便番号API 部分まで書いたら…
 
+  // Next／Prev ボタン
+  nexts.forEach((btn,i)=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.disabled) return;
+      if(i===4)      idx = 5;
+      else if(i===5) idx = 6;
+      else            idx = i+1;
+      show(idx);
+    });
+  });
+  prevs.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(idx>0){
+        idx--;
+        show(idx);
+      }
+    });
+  });
 
+  // 初期表示
+  show(0);
+
+})();  /* ← ここで IIFE を閉じる */
 </script>
+
 
 
 
