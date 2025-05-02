@@ -446,59 +446,71 @@
     e.target.reportValidity();
   });
 
-  // Step 表示切り替え
-  function show(i){
-    // 現在のステップ更新
-    currentStepIndex = i;
+ // ステップ表示切り替え関数
+function show(i) {
+  // 現在のステップを記憶
+  currentStepIndex = i;
 
-    // 各ステップ表示切替
-    steps.forEach((s,j)=> s.classList.toggle('active', j===i));
-    updateProgress();
+  // 全ステップのアクティブ／非アクティブ切り替え
+  steps.forEach((s, j) => s.classList.toggle('active', j === i));
+  updateProgress();
 
-    // Step2 個人/法人
-    if(i === 1){
-      const isCorp = document.getElementById('use-corporate').checked;
-      document.getElementById('personal-info' ).style.display = isCorp ? 'none'  : 'block';
-      document.getElementById('corporate-info').style.display = isCorp ? 'block' : 'none';
-      document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea')
-        .forEach(e=> e.disabled = isCorp);
-      document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea')
-        .forEach(e=> e.disabled = !isCorp);
-    }
+  // Step2: 個人／法人情報の切り替え
+  if (i === 1) {
+    const isCorp = document.getElementById('use-corporate').checked;
+    document.getElementById('personal-info').style.display  = isCorp ? 'none' : 'block';
+    document.getElementById('corporate-info').style.display = isCorp ? 'block' : 'none';
+    // 入力欄の有効／無効
+    document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea')
+      .forEach(e => e.disabled = isCorp);
+    document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea')
+      .forEach(e => e.disabled = !isCorp);
+  }
 
-    // Step5.5 はいったん全部隠す
-    step55.style.display = 'none';
-    [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=> el.classList.add('hidden'));
+  // Step5.5 まわりはいったん全部隠す
+  step55.style.display = 'none';
+  [visitGrp, delSvcGrp, locGrp, addrGrp, delTimeGrp].forEach(el => el.classList.add('hidden'));
 
-    // Step5.5 の切り替え
-    if(i === 5){
-      step55.style.display = 'block';
-      const days = +daysInput.value;
-      if(days < 30){
+  // Step5.5 の中身切り替え
+  if (i === 5) {
+    step55.style.display = 'block';
+    const days = +daysInput.value;
+    if (days < 30) {
+      // 7～29日は来店時刻だけ
+      visitGrp.classList.remove('hidden');
+      populateVisitTimes();
+    } else {
+      // 30日以上は配送サービスの有無を問い
+      delSvcGrp.classList.remove('hidden');
+      if (document.getElementById('del-no').checked) {
+        // デフォルト「利用しない」なら来店時刻も表示
         visitGrp.classList.remove('hidden');
         populateVisitTimes();
-      } else {
-        delSvcGrp.classList.remove('hidden');
-        // デフォルト「利用しない」時は来店時刻も同時に表示
-        if(document.getElementById('del-no').checked){
-          visitGrp.classList.remove('hidden');
-          populateVisitTimes();
-        }
       }
     }
-
-    // Step5 で 7日未満は丸め
-    if(i===4 && +daysInput.value < 7){
-      daysInput.value     = 7;
-      daysVal.textContent = '7';
-      calcReturn();
-    }
-
-    // Step7 入場時は送信ボタン状態を更新
-    if(i === 7) updateSubmitButton();
-
-    updateNext();
   }
+
+  // Step5 → 7日未満は自動丸め
+  if (i === 4 && +daysInput.value < 7) {
+    daysInput.value     = 7;
+    daysVal.textContent = '7';
+    calcReturn();
+  }
+
+  // Step7: 同意チェック群の表示切り替え＆送信ボタン更新
+  if (i === 7) {
+    const isCorp = document.getElementById('use-corporate').checked;
+    // 個人用／法人用の条文を切り替え
+    document.getElementById('terms-personal' ).style.display = isCorp ? 'none' : 'block';
+    document.getElementById('terms-corporate').style.display = isCorp ? 'block': 'none';
+    // 同意チェックを走査して送信ボタンを有効化
+    updateSubmitButton();
+  }
+
+  // 「次へ」ボタンの活性／非活性を最終チェック
+  updateNext();
+}
+
 
   // Step7 の送信可否判定
   function updateSubmitButton(){
@@ -578,8 +590,36 @@
       .catch(err => console.warn('郵便番号APIエラー', err));
   });
 });
-    // 郵便番号API 部分まで書いたら…
+    
+  // 配送サービス「利用する」を選んだら…
+  document.getElementById('del-yes').addEventListener('change', ()=>{
+    // 来店時刻は隠す
+    visitGrp.classList.add('hidden');
+    // 配送サービス詳細を表示
+    locGrp.classList.remove('hidden');
+    delTimeGrp.classList.remove('hidden');
+    // 「住所と異なる」を選んでいたら配送先入力も出す
+    if (document.getElementById('loc-different').checked) {
+      addrGrp.classList.remove('hidden');
+    }
+    populateDeliveryTimes();
+    updateNext();
+  });
 
+  // 配送サービス「利用しない」を選んだら…
+  document.getElementById('del-no').addEventListener('change', ()=>{
+    // 配送詳細だけ隠す（delSvcGrpは隠さない）
+    [locGrp, addrGrp, delTimeGrp].forEach(el=>el.classList.add('hidden'));
+    // 来店時刻を常に表示
+    visitGrp.classList.remove('hidden');
+    populateVisitTimes();
+    updateNext();
+  });
+
+  // 配送場所 “同じ／異なる” の切り替え
+  document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
+  document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
+ 
   // Next／Prev ボタン
   nexts.forEach((btn,i)=>{
     btn.addEventListener('click', ()=>{
