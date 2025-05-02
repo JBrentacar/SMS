@@ -178,225 +178,258 @@
     </form>
   </div>
   <script>
-  (function(){
-    const steps     = document.querySelectorAll('.form-step');
-    const nexts     = document.querySelectorAll('.btn-next');
-    const prevs     = document.querySelectorAll('.btn-prev');
-    const prog      = document.querySelector('.progress-inner');
-    const daysInput = document.getElementById('days');
-    const daysVal   = document.getElementById('days-value');
-    const retDate   = document.getElementById('return-date');
-    const step5_5   = document.getElementById('step5-5');
+// rentalForm.js
+;(function(){
+  const steps     = document.querySelectorAll('.form-step');
+  const nexts     = document.querySelectorAll('.btn-next');
+  const prevs     = document.querySelectorAll('.btn-prev');
+  const prog      = document.querySelector('.progress-inner');
+  const daysInput = document.getElementById('days');
+  const daysVal   = document.getElementById('days-value');
+  const retDate   = document.getElementById('return-date');
+  const step55    = document.getElementById('step5-5');
 
-    // Step5.5用要素
-    const visitGrp   = document.getElementById('visit-time-group');
-    const visitSel   = document.getElementById('visit-time-select');
-    const delSvcGrp  = document.getElementById('delivery-service-group');
-    const locGrp     = document.getElementById('location-group');
-    const addrGrp    = document.getElementById('delivery-address-group');
-    const delTimeGrp = document.getElementById('delivery-time-group');
-    const delTimeSel = document.getElementById('delivery-time-select');
+  // Step5.5 用要素
+  const visitGrp   = document.getElementById('visit-time-group');
+  const visitSel   = document.getElementById('visit-time-select');
+  const delSvcGrp  = document.getElementById('delivery-service-group');
+  const locGrp     = document.getElementById('location-group');
+  const addrGrp    = document.getElementById('delivery-address-group');
+  const delTimeGrp = document.getElementById('delivery-time-group');
+  const delTimeSel = document.getElementById('delivery-time-select');
 
-    // 日数ボタン
-    const increase = document.getElementById('days-increase');
-    const decrease = document.getElementById('days-decrease');
+  // 日数増減ボタン
+  const increase = document.getElementById('days-increase');
+  const decrease = document.getElementById('days-decrease');
 
-    // 既存API・バリデーション用要素
-    const pZip     = document.getElementById('p-zip');
-    const cZip     = document.getElementById('c-zip');
-    const pAddr    = document.getElementById('p-address');
-    const cAddr    = document.getElementById('c-address');
-    const pLic     = document.getElementById('p-license');
-    const optNone  = document.getElementById('opt-none');
-    const others   = [
-      document.getElementById('opt-insurance'),
-      document.getElementById('opt-waiver'),
-      document.getElementById('opt-tire'),
-      document.getElementById('opt-etc'),
-      document.getElementById('opt-navi')
-    ];
+  // 郵便番号API／免許番号API／オプション用要素
+  const pZip     = document.getElementById('p-zip');
+  const cZip     = document.getElementById('c-zip');
+  const pAddress = document.getElementById('p-address');
+  const cAddress = document.getElementById('c-address');
+  const pLicense = document.getElementById('p-license');
+  const optNone  = document.getElementById('opt-none');
+  const others   = [
+    document.getElementById('opt-insurance'),
+    document.getElementById('opt-waiver'),
+    document.getElementById('opt-tire'),
+    document.getElementById('opt-etc'),
+    document.getElementById('opt-navi')
+  ];
 
-    let idx = 0;
+  let idx = 0;
 
-    function updateProgress(){
-      prog.style.width = (idx/(steps.length-1)*100) + '%';
+  // プログレスバー更新
+  function updateProgress(){
+    prog.style.width = (idx / (steps.length - 1) * 100) + '%';
+  }
+
+  // 次へボタン有効化判定
+  function updateNext(){
+    const fields = Array.from(steps[idx].querySelectorAll('input,select,textarea'));
+    nexts[idx].disabled = !fields.every(f => f.disabled || f.checkValidity());
+  }
+
+  // 返却予定日計算
+  function calcReturn(){
+    const sd = document.getElementById('start-date').value;
+    const days = +daysInput.value;
+    if(sd){
+      const d = new Date(sd);
+      d.setDate(d.getDate() + days);
+      retDate.value = d.toISOString().slice(0,10);
     }
-    function updateNext(){
-      const fields = Array.from(steps[idx].querySelectorAll('input,select,textarea'));
-      nexts[idx].disabled = !fields.every(f=> f.disabled || f.checkValidity());
+  }
+
+  // 来店時刻オプション生成（15分刻み）
+  function populateVisitTimes(){
+    visitSel.innerHTML = '';
+    const sd = document.getElementById('start-date').value;
+    const d  = sd ? new Date(sd) : new Date();
+    const day = d.getDay(); // 0:日曜, 1-5:平日, 6:土曜
+    const startH = (day >= 1 && day <= 5) ? 9 : 10;
+    const endH   = (day >= 1 && day <= 5) ? 17.5 : 15.5;
+    for(let t = startH; t < endH; t += 0.25){
+      const hh  = Math.floor(t),
+            mm  = Math.round((t - hh) * 60),
+            t2  = t + 0.25,
+            hh2 = Math.floor(t2),
+            mm2 = Math.round((t2 - hh2) * 60),
+            txt = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}〜${String(hh2).padStart(2,'0')}:${String(mm2).padStart(2,'0')}`;
+      visitSel.insertAdjacentHTML('beforeend', `<option value="${txt}">${txt}</option>`);
     }
-    function calcReturn(){
-      const sd = document.getElementById('start-date').value;
+  }
+
+  // 配送希望時間生成（30分刻み）
+  function populateDeliveryTimes(){
+    delTimeSel.innerHTML = '';
+    for(let h = 10; h < 17; h++){
+      const o1 = `${String(h).padStart(2,'0')}:00〜${String(h).padStart(2,'0')}:30`;
+      const o2 = `${String(h).padStart(2,'0')}:30〜${String(h+1).padStart(2,'0')}:00`;
+      delTimeSel.insertAdjacentHTML('beforeend', `<option value="${o1}">${o1}</option>`);
+      delTimeSel.insertAdjacentHTML('beforeend', `<option value="${o2}">${o2}</option>`);
+    }
+  }
+
+  // ステップ表示切替
+  function show(i){
+    steps.forEach((s,j) => s.classList.toggle('active', j === i));
+    updateProgress();
+
+    // Step5.5 要素は一旦全隠し
+    step55.style.display = 'none';
+    [visitGrp, delSvcGrp, locGrp, addrGrp, delTimeGrp].forEach(el => el.classList.add('hidden'));
+
+    // Step2: 個人/法人 切替
+    if(i === 1){
+      const isCorp = document.getElementById('use-corporate').checked;
+      document.getElementById('personal-info' ).style.display = isCorp ? 'none'  : 'block';
+      document.getElementById('corporate-info').style.display = isCorp ? 'block' : 'none';
+      document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea')
+              .forEach(e => e.disabled = isCorp);
+      document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea')
+              .forEach(e => e.disabled = !isCorp);
+    }
+
+    // Step5.5 分岐表示
+    if(i === 5){
+      step55.style.display = 'block';
       const days = +daysInput.value;
-      if(sd){
-        const d = new Date(sd);
-        d.setDate(d.getDate()+days);
-        retDate.value = d.toISOString().slice(0,10);
-      }
-    }
-    function populateVisitTimes(){
-      visitSel.innerHTML = '';
-      const sd  = document.getElementById('start-date').value;
-      const d   = sd? new Date(sd): new Date();
-      const day = d.getDay();
-      const startH = (day>=1&&day<=5)?9:10;
-      const endH   = (day>=1&&day<=5)?17.5:15.5;
-      for(let t=startH;t<endH;t+=0.25){
-        const hh = Math.floor(t), mm = (t-hh)*60;
-        const t2 = t+0.25, hh2 = Math.floor(t2), mm2 = (t2-hh2)*60;
-        const txt = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}〜${String(hh2).padStart(2,'0')}:${String(mm2).padStart(2,'0')}`;
-        visitSel.insertAdjacentHTML('beforeend', `<option value="${txt}">${txt}</option>`);
-      }
-    }
-    function populateDeliveryTimes(){
-      delTimeSel.innerHTML = '';
-      for(let h=10;h<17;h++){
-        const o1 = `${String(h).padStart(2,'0')}:00〜${String(h).padStart(2,'0')}:30`;
-        const o2 = `${String(h).padStart(2,'0')}:30〜${String(h+1).padStart(2,'0')}:00`;
-        delTimeSel.insertAdjacentHTML('beforeend', `<option>${o1}</option><option>${o2}</option>`);
+      if(days < 30){
+        visitGrp.classList.remove('hidden');
+        populateVisitTimes();
+      } else {
+        delSvcGrp.classList.remove('hidden');
+        populateDeliveryTimes();
       }
     }
 
-    function show(i){
-      steps.forEach((s,j)=> s.classList.toggle('active',j===i));
-      updateProgress();
-      // 一旦5.5を全部隠す
-      step5_5.style.display='none';
-      [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
+    // Step5 で7日未満は自動丸め
+    if(i === 4 && +daysInput.value < 7){
+      daysInput.value = 7;
+      daysVal.textContent = '7';
+      calcReturn();
+    }
 
-      // Step2: 個人/法人切替
-      if(i===1){
-        const isCorp = document.getElementById('use-corporate').checked;
-        document.getElementById('personal-info').style.display  = isCorp?'none':'block';
-        document.getElementById('corporate-info').style.display = isCorp?'block':'none';
-        document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea')
-          .forEach(e=>e.disabled=isCorp);
-        document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea')
-          .forEach(e=>e.disabled=!isCorp);
-      }
+    // 7～29日は 5.5 終了後自動でステップ6へ
+    if(i === 5 && +daysInput.value < 30){
+      idx = 6;
+      show(idx);
+      return;
+    }
 
-      // Step5.5 表示切替
-      if(i===5){
-        step5_5.style.display='block';
-        const days = +daysInput.value;
-        if(days<30){
-          visitGrp.classList.remove('hidden');
-          populateVisitTimes();
-        } else {
-          delSvcGrp.classList.remove('hidden');
-          populateDeliveryTimes();
-        }
-      }
+    updateNext();
+  }
 
-      // 7日未満は丸め
-      if(i===4 && +daysInput.value<7){
-        daysInput.value=7; daysVal.textContent=7; calcReturn();
-      }
+  // イベント登録：バリデーションチェック
+  steps.forEach(step => {
+    step.querySelectorAll('input,select,textarea').forEach(el => {
+      el.addEventListener('input', updateNext);
+      el.addEventListener('change', updateNext);
+    });
+  });
 
-      // スキップ（5→6）
-      if(i===5 && +daysInput.value<30){
-        idx=6; show(idx); return;
-      }
-
+  // 日数増減ボタン
+  increase.addEventListener('click', ()=>{
+    daysInput.value = +daysInput.value + 1;
+    daysVal.textContent = daysInput.value;
+    calcReturn();
+    updateNext();
+  });
+  decrease.addEventListener('click', ()=>{
+    if(+daysInput.value > 7){
+      daysInput.value = +daysInput.value - 1;
+      daysVal.textContent = daysInput.value;
+      calcReturn();
       updateNext();
     }
+  });
 
-    // 初期バリデーション登録
-    steps.forEach(step=>{
-      step.querySelectorAll('input,select,textarea').forEach(el=>{
-        el.addEventListener('input', updateNext);
-        el.addEventListener('change', updateNext);
-      });
+  // 郵便番号 → 数字以外除去 + Blur で API
+  [pZip, cZip].forEach(z => {
+    if(!z) return;
+    z.addEventListener('input', ()=> z.value = z.value.replace(/\D/g,''));
+    z.addEventListener('blur', ()=>{
+      fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
+        .then(r=>r.json()).then(j=>{
+          if(j.results){
+            const r = j.results[0];
+            const addr = r.address1 + r.address2 + r.address3;
+            (z===pZip? pAddress: cAddress).value = addr;
+          }
+        });
     });
+  });
 
-    // 日数増減
-    increase.addEventListener('click', ()=>{
-      daysInput.value=+daysInput.value+1; daysVal.textContent=daysInput.value; calcReturn(); updateNext();
-    });
-    decrease.addEventListener('click', ()=>{
-      if(+daysInput.value>7){
-        daysInput.value=+daysInput.value-1; daysVal.textContent=daysInput.value; calcReturn(); updateNext();
+  // 免許証番号 12桁チェック
+  if(pLicense){
+    pLicense.addEventListener('input', ()=>{
+      if(pLicense.value && pLicense.value.length !== 12){
+        pLicense.setCustomValidity('12ケタの数字を入力してください');
+      } else {
+        pLicense.setCustomValidity('');
       }
+      pLicense.reportValidity();
     });
+  }
 
-    // 郵便番号API & 数字以外削除
-    [pZip,cZip].forEach(z=>{
-      if(!z) return;
-      z.addEventListener('input', ()=> z.value=z.value.replace(/[^0-9]/g,''));
-      z.addEventListener('blur', ()=>{
-        fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
-          .then(r=>r.json()).then(j=>{
-            if(j.results){
-              const a = j.results[0];
-              const addr = a.address1 + a.address2 + a.address3;
-              (z===pZip? pAddr: cAddr).value = addr;
-            }
-          });
-      });
-    });
-
-    // 免許証12桁チェック
-    if(pLic){
-      pLic.addEventListener('input', ()=>{
-        if(pLic.value && pLic.value.length!==12) pLic.setCustomValidity('12ケタの数字を入力してください');
-        else pLic.setCustomValidity('');
-        pLic.reportValidity();
-      });
-    }
-
-    // オプション排他
-    if(optNone){
-      optNone.addEventListener('change', ()=>{
-        if(optNone.checked) others.forEach(o=>o.checked=false);
-        updateNext();
-      });
-    }
-    others.forEach(o=>{
-      if(!o) return;
-      o.addEventListener('change', ()=>{
-        if(o.checked) optNone.checked=false;
-        updateNext();
-      });
-    });
-
-    // 配送サービス選択
-    document.getElementById('del-yes').addEventListener('change', ()=>{
-      locGrp.classList.remove('hidden');
-      delTimeGrp.classList.remove('hidden');
-      if(document.getElementById('loc-different').checked) addrGrp.classList.remove('hidden');
-    });
-    document.getElementById('del-no').addEventListener('change', ()=>{
-      // 配送関連全部隠す
-      [delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
-      // 来店時刻だけ出す
-      visitGrp.classList.remove('hidden');
-      populateVisitTimes();
+  // オプション「全て加入しない」排他制御
+  if(optNone){
+    optNone.addEventListener('change', ()=>{
+      if(optNone.checked) others.forEach(o=>o.checked=false);
       updateNext();
     });
-
-    // 配送場所選択
-    document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
-    document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
-
-    // 次へ／戻る
-    nexts.forEach((btn,i)=>{
-      btn.addEventListener('click', ()=>{
-        if(btn.disabled) return;
-        if(i===4) idx = 5; else idx = i+1;
-        show(idx);
-      });
+  }
+  others.forEach(o=>{
+    if(!o) return;
+    o.addEventListener('change', ()=>{
+      if(o.checked) optNone.checked = false;
+      updateNext();
     });
-    prevs.forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        if(idx>0){ idx--; show(idx); }
-      });
+  });
+
+  // 配送サービス利用の有無 切替
+  document.getElementById('del-yes').addEventListener('change', ()=>{
+    locGrp.classList.remove('hidden');
+    delTimeGrp.classList.remove('hidden');
+    if(document.getElementById('loc-different').checked){
+      addrGrp.classList.remove('hidden');
+    }
+  });
+  document.getElementById('del-no').addEventListener('change', ()=>{
+    // 配送パート隠して来店時刻だけ表示
+    [delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
+    visitGrp.classList.remove('hidden');
+    populateVisitTimes();
+    updateNext();
+  });
+
+  // 配送場所（住所と同じ/異なる）切替
+  document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
+  document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
+
+  // 次へ／戻るナビゲーション
+  nexts.forEach((btn,i)=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.disabled) return;
+      // Step5（index=4）→常に5.5
+      if(i === 4) idx = 5;
+      else           idx = i + 1;
+      show(idx);
     });
+  });
+  prevs.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(idx > 0){ idx--; show(idx); }
+    });
+  });
 
-    // 初期表示
-    show(0);
+  // 最初は Step1
+  show(0);
 
-  })();
-  </script>
+})();
+</script>
+
 
 </body>
 </html>
