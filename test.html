@@ -35,6 +35,20 @@
     .slider:before { position:absolute; content:""; height:16px; width:16px; left:2px; bottom:2px; background:white; transition:.2s; border-radius:50%; }
     .switch input:checked + .slider { background:#0068e9; }
     .switch input:checked + .slider:before { transform: translateX(20px); }
+.quick-days {
+  margin-bottom: 1rem; /* 下に 16px 程度の余白 */
+}
+.quick-days button {
+  margin-right: 0.5rem; /* ボタン同士の間隔 */
+  margin-bottom: 0.5rem; /* 折り返し後にも余白 */
+}
+/* ステップ4 のオプション群 */
+.form-step[data-step="4"] .switch {
+  display: block;
+  margin-bottom: 0.75rem; /* 上下の余白を少し開ける */
+}
+
+    
   </style>
 </head>
 <body>
@@ -115,14 +129,15 @@
   </div>
   <div class="form-group">
     <label>ご利用日数 <span style="color:red">*</span></label>
-    <!-- クイック選択ボタン -->
-    <div class="quick-days">
-      <button type="button" class="btn-day" data-days="7">7日</button>
-      <button type="button" class="btn-day" data-days="14">14日</button>
-      <button type="button" class="btn-day" data-days="30">30日</button>
-      <button type="button" class="btn-day" data-days="60">60日</button>
-      <button type="button" class="btn-day" data-days="90">90日</button>
-    </div>
+   <div class="quick-days">
+  <button type="button" class="btn-day" data-days="7">7日</button>
+  <button type="button" class="btn-day" data-days="14">14日</button>
+  <br>
+  <button type="button" class="btn-day" data-days="30">30日</button>
+  <button type="button" class="btn-day" data-days="60">60日</button>
+  <button type="button" class="btn-day" data-days="90">90日</button>
+</div>
+
     <!-- 既存の日数ピッカー -->
     <div class="day-picker">
       <button type="button" id="days-decrease">-</button>
@@ -378,6 +393,12 @@
       daysVal.textContent = '7';
       calcReturn();
     }
+     if (i === 6) {
+    const isCorp = document.getElementById('use-corporate').checked;
+    // #terms-personal, #terms-corporate は CSS で初期 display:none なので
+    document.getElementById('terms-personal').style.display = isCorp ? 'none'  : 'block';
+    document.getElementById('terms-corporate').style.display = isCorp ? 'block' : 'none';
+  }
 
     updateNext();
   }
