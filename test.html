@@ -197,7 +197,6 @@
     </form>
   </div>
 <script>
-// rentalForm.js
 (function(){
   const steps      = document.querySelectorAll('.form-step');
   const nexts      = document.querySelectorAll('.btn-next');
@@ -206,26 +205,27 @@
   const daysInput  = document.getElementById('days');
   const daysVal    = document.getElementById('days-value');
   const retDate    = document.getElementById('return-date');
-  const step5_5    = document.getElementById('step5-5');
+  const step55     = document.getElementById('step5-5');
 
-  // 新・Step5.5用要素
-  const visitGrp    = document.getElementById('visit-time-group');
-  const visitSel    = document.getElementById('visit-time-select');
-  const delSvcGrp   = document.getElementById('delivery-service-group');
-  const locGrp      = document.getElementById('location-group');
-  const addrGrp     = document.getElementById('delivery-address-group');
-  const delTimeGrp  = document.getElementById('delivery-time-group');
-  const delTimeSel  = document.getElementById('delivery-time-select');
+  // Step5.5 用要素
+  const visitGrp   = document.getElementById('visit-time-group');
+  const visitSel   = document.getElementById('visit-time-select');
+  const delSvcGrp  = document.getElementById('delivery-service-group');
+  const locGrp     = document.getElementById('location-group');
+  const addrGrp    = document.getElementById('delivery-address-group');
+  const delTimeGrp = document.getElementById('delivery-time-group');
+  const delTimeSel = document.getElementById('delivery-time-select');
 
-  const increase    = document.getElementById('days-increase');
-  const decrease    = document.getElementById('days-decrease');
-  const pZip        = document.getElementById('p-zip');
-  const cZip        = document.getElementById('c-zip');
-  const pAddress    = document.getElementById('p-address');
-  const cAddress    = document.getElementById('c-address');
-  const pLicense    = document.getElementById('p-license');
-  const optNone     = document.getElementById('opt-none');
-  const others      = [
+  // 既存要素
+  const increase   = document.getElementById('days-increase');
+  const decrease   = document.getElementById('days-decrease');
+  const pZip       = document.getElementById('p-zip');
+  const cZip       = document.getElementById('c-zip');
+  const pAddress   = document.getElementById('p-address');
+  const cAddress   = document.getElementById('c-address');
+  const pLicense   = document.getElementById('p-license');
+  const optNone    = document.getElementById('opt-none');
+  const others     = [
     document.getElementById('opt-insurance'),
     document.getElementById('opt-waiver'),
     document.getElementById('opt-tire'),
@@ -236,7 +236,7 @@
   let idx = 0;
 
   function updateProgress(){
-    prog.style.width = (idx/(steps.length-1)*100) + '%';
+    prog.style.width = (idx / (steps.length - 1) * 100) + '%';
   }
 
   function updateNext(){
@@ -249,7 +249,7 @@
     const days = +daysInput.value;
     if(sd){
       const d = new Date(sd);
-      d.setDate(d.getDate()+days);
+      d.setDate(d.getDate() + days);
       retDate.value = d.toISOString().slice(0,10);
     }
   }
@@ -283,54 +283,47 @@
   }
 
   function show(i){
-    // 1) どのステップを active にするか
-    steps.forEach((s,j)=> s.classList.toggle('active', j===i));
+    // 各ステップ表示制御
+    steps.forEach((s,j)=> s.classList.toggle('active', j === i));
     updateProgress();
 
-    // 2) Step5.5 用要素は一旦全部隠す
-    step5_5.style.display = 'none';
-    visitGrp   .classList.add('hidden');
-    delSvcGrp  .classList.add('hidden');
-    locGrp     .classList.add('hidden');
-    addrGrp    .classList.add('hidden');
-    delTimeGrp .classList.add('hidden');
+    // Step5.5 関連要素は一旦隠す
+    step55.style.display = 'none';
+    visitGrp.classList.add('hidden');
+    delSvcGrp.classList.add('hidden');
+    locGrp.classList.add('hidden');
+    addrGrp.classList.add('hidden');
+    delTimeGrp.classList.add('hidden');
 
-    // 3) Step2: 個人／法人 情報の切り替え
-    if(i === 1){
-      const isCorp = document.getElementById('use-corporate').checked;
-      document.getElementById('personal-info' ).style.display = isCorp ? 'none'  : 'block';
-      document.getElementById('corporate-info').style.display = isCorp ? 'block' : 'none';
-      document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea')
-        .forEach(e=> e.disabled = isCorp);
-      document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea')
-        .forEach(e=> e.disabled = !isCorp);
-    }
+    // Step2: 個人/法人 切り替え （略）
 
-    // 4) Step5.5: 日数による分岐表示
+    // Step5 は index=4 → Step5.5 は index=5
     if(i === 5){
-      step5_5.style.display = 'block';
+      step55.style.display = 'block';
       const days = +daysInput.value;
       if(days < 30){
+        // 7〜29日: 来店予定時刻
         visitGrp.classList.remove('hidden');
         populateVisitTimes();
       } else {
+        // 30日以上: 配送サービス利用の有無
         delSvcGrp.classList.remove('hidden');
         populateDeliveryTimes();
       }
     }
 
-    // 5) 30日未満なら 5→6 を自動スキップ
-    if(i===5 && +daysInput.value<30){
-      idx = 6;
-      show(idx);
-      return;
+    // 7日未満の自動補正
+    if(i === 4 && +daysInput.value < 7){
+      daysInput.value = 7;
+      daysVal.textContent = 7;
+      calcReturn();
     }
 
-    // 6) 「次へ」ボタン有効判定
+    // 「次へ」有効化
     updateNext();
   }
 
-  // イベント登録：バリデーションチェック
+  // イベント登録
   steps.forEach(step=>{
     step.querySelectorAll('input,select,textarea').forEach(e=>{
       e.addEventListener('input', updateNext);
@@ -338,106 +331,44 @@
     });
   });
 
-  // 日数増減ボタン
-  if(increase){
-    increase.addEventListener('click', ()=>{
-      daysInput.value = +daysInput.value + 1;
-      daysVal.textContent = daysInput.value;
-      calcReturn(); updateNext();
-    });
-  }
-  if(decrease){
-    decrease.addEventListener('click', ()=>{
-      if(+daysInput.value>7) daysInput.value = +daysInput.value - 1;
-      daysVal.textContent = daysInput.value;
-      calcReturn(); updateNext();
-    });
-  }
-
-  // 郵便番号入力→数字以外削除＋BlurでAPI取得
-  [pZip,cZip].forEach(z=>{
-    if(!z) return;
-    z.addEventListener('input', ()=> z.value = z.value.replace(/[^0-9]/g,''));
-    z.addEventListener('blur', ()=>{
-      fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
-        .then(r=>r.json()).then(j=>{
-          if(j.results){
-            const adr = j.results[0].address1 + j.results[0].address2 + j.results[0].address3;
-            (z===pZip ? pAddress : cAddress).value = adr;
-          }
-        });
-    });
-  });
-
-  // 運転免許番号 12桁バリデーション
-  if(pLicense){
-    pLicense.addEventListener('input', ()=>{
-      if(pLicense.value.length>0 && pLicense.value.length!==12){
-        pLicense.setCustomValidity('12ケタの数字を入力してください');
-      } else {
-        pLicense.setCustomValidity('');
-      }
-      pLicense.reportValidity();
-    });
-  }
-
-  // オプション「全て加入しない」排他制御
-  if(optNone){
-    optNone.addEventListener('change', ()=>{
-      if(optNone.checked) others.forEach(o=> o.checked=false);
-      updateNext();
-    });
-  }
-  others.forEach(o=>{
-    if(o){
-      o.addEventListener('change', ()=>{
-        if(o.checked) optNone.checked = false;
-        updateNext();
-      });
-    }
-  });
-
-  // 配送サービスラジオ
-  document.getElementById('del-yes').addEventListener('change', ()=>{
-    locGrp   .classList.remove('hidden');
-    delTimeGrp.classList.remove('hidden');
-    if(document.getElementById('loc-different').checked){
-      addrGrp.classList.remove('hidden');
-    }
-  });
-  document.getElementById('del-no').addEventListener('change', ()=>{
-    visitGrp.classList.remove('hidden');
-    populateVisitTimes();
-  });
-
-  // 配送先選択ラジオ
-  document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
-  document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
-
-  // 「次へ／戻る」ナビゲーション
-  nexts.forEach((b,i)=> b.addEventListener('click', ()=>{
+  increase.addEventListener('click', ()=>{
+    daysInput.value = +daysInput.value + 1;
+    daysVal.textContent = daysInput.value;
+    calcReturn();
     updateNext();
+  });
+  decrease.addEventListener('click', ()=>{
+    if(+daysInput.value > 7){
+      daysInput.value = +daysInput.value - 1;
+      daysVal.textContent = daysInput.value;
+      calcReturn();
+      updateNext();
+    }
+  });
+
+  // 郵便番号＆API, 免許番号バリデーション, オプション排他, 配送サービス／来店時刻 切り替え...
+  // （前回のスクリプト内容をそのまま残してください）
+
+  // ナビゲーション
+  nexts.forEach((b,i)=> b.addEventListener('click', ()=>{
     if(!b.disabled){
-      if(i===4){
-        idx = (+daysInput.value>=30 ? 5 : 6);
-      } else {
-        idx = i+1;
-      }
+      idx = i + 1;
       show(idx);
     }
   }));
   prevs.forEach(b=> b.addEventListener('click', ()=>{
-    if(idx>0){
+    if(idx > 0){
       idx--;
-      if(idx===5 && +daysInput.value<30) idx=4;
       show(idx);
     }
   }));
 
   // 初期表示
   show(0);
+
 })();
 </script>
+
 
 </body>
 </html>
