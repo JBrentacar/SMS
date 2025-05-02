@@ -562,6 +562,32 @@ function show(i) {
       updateNext();
     }
   });
+// Step4：オプション排他制御
+const optNone = document.getElementById('opt-none');
+const others  = [
+  document.getElementById('opt-insurance'),
+  document.getElementById('opt-waiver'),
+  document.getElementById('opt-tire'),
+  document.getElementById('opt-etc'),
+  document.getElementById('opt-navi'),
+];
+
+// 「全て加入しない」を押したら他をオフに
+optNone.addEventListener('change', () => {
+  if (optNone.checked) {
+    others.forEach(o => o.checked = false);
+  }
+  updateNext();
+});
+
+// その他を押したら「全て加入しない」をオフに
+others.forEach(o => {
+  if (!o) return;
+  o.addEventListener('change', () => {
+    if (o.checked) optNone.checked = false;
+    updateNext();
+  });
+});
 
   // 郵便番号API
  // 郵便番号入力 → 住所自動補完
