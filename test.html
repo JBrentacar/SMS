@@ -164,49 +164,169 @@
   </div>
   <script>
   (function(){
-    const steps=document.querySelectorAll('.form-step');
-    const nexts=document.querySelectorAll('.btn-next');
-    const prevs=document.querySelectorAll('.btn-prev');
-    const prog=document.querySelector('.progress-inner');
-    const daysInput=document.getElementById('days');
-    const daysVal=document.getElementById('days-value');
-    const retDate=document.getElementById('return-date');
-    const step5_5=document.getElementById('step5-5');
-    const delGroup=document.getElementById('step5-5');
-    const increase=document.getElementById('days-increase');
-    const decrease=document.getElementById('days-decrease');
-    const pZip=document.getElementById('p-zip');
-    const cZip=document.getElementById('c-zip');
-    const pAddress=document.getElementById('p-address');
-    const cAddress=document.getElementById('c-address');
-    const pLicense=document.getElementById('p-license');
-    let idx=0;
-    function updateProgress(){ prog.style.width=(idx/(steps.length-1)*100)+'%;'; }
-    function updateNext(){ const ins=[...steps[idx].querySelectorAll('input,select,textarea')]; nexts[idx].disabled=!ins.every(i=>i.disabled||i.checkValidity()); }
-    function calcReturn(){ const sd=document.getElementById('start-date').value; const days=+daysInput.value; if(sd){ const d=new Date(sd); d.setDate(d.getDate()+days); retDate.value=d.toISOString().slice(0,10);} }
-    function show(i){ steps.forEach((s,j)=>s.classList.toggle('active',j===i)); updateProgress();
-      if(i===1){ const corp=document.getElementById('use-corporate').checked;['personal','corporate'].forEach(t=>document.getElementById(t+'-info').style.display=(t==='personal'?!corp:corp)?'block':'none'); const persEls=document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea'); persEls.forEach(e=>e.disabled=corp); const corpEls=document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea'); corpEls.forEach(e=>e.disabled=!corp);}      
-      if(i===4){ calcReturn(); if(+daysInput.value>=30) step5_5.style.display='block'; else step5_5.style.display='none'; }
-      if(i===5 && +daysInput.value<30){ idx=6; show(idx); return;}      
-      if(i===steps.length-1){ const corp=document.getElementById('use-corporate').checked; document.getElementById('terms-personal').style.display=corp?'none':'block'; document.getElementById('terms-corporate').style.display=corp?'block':'none'; document.querySelectorAll('#terms-personal input').forEach(e=>e.disabled=corp); document.querySelectorAll('#terms-corporate input').forEach(e=>e.disabled=!corp);}      
-      updateNext(); }
-    // events
-    steps.forEach(s=>s.querySelectorAll('input,select,textarea').forEach(e=>{ e.addEventListener('input',updateNext); e.addEventListener('change',updateNext);}));
-    increase.addEventListener('click',()=>{ let v=+daysInput.value; daysInput.value=v+1; daysVal.textContent=daysInput.value; calcReturn(); updateNext();});
-    decrease.addEventListener('click',()=>{ let v=+daysInput.value; if(v>7) daysInput.value=v-1; daysVal.textContent=daysInput.value; calcReturn(); updateNext();});
-    // zip auto strip & API
-    [pZip,cZip].forEach(z=>{ z.addEventListener('input',()=>{ z.value=z.value.replace(/[^0-9]/g,''); }); z.addEventListener('blur',()=>{ fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode='+z.value).then(r=>r.json()).then(j=>{ if(j.results){ const addr=j.results[0].address1+j.results[0].address2+j.results[0].address3; (z===pZip?pAddress:cAddress).value=addr; }}); }); });
-    // license validation
-    pLicense.addEventListener('input',()=>{ if(pLicense.value.length>0&&pLicense.value.length!==12){ pLicense.setCustomValidity('12ケタの数字を入力してください'); } else pLicense.setCustomValidity(''); pLicense.reportValidity(); });
-    // option exclusive
-    const optNone=document.getElementById('opt-none'); const others=[document.getElementById('opt-insurance'),document.getElementById('opt-waiver'),document.getElementById('opt-tire'),document.getElementById('opt-etc'),document.getElementById('opt-navi')];
-    optNone.addEventListener('change',()=>{ if(optNone.checked) others.forEach(o=>{ o.checked=false; }); updateNext(); });
-    others.forEach(o=>o.addEventListener('change',()=>{ if(o.checked) optNone.checked=false; updateNext(); }));
-    // navigation
-    nexts.forEach((b,i)=>b.addEventListener('click',()=>{ updateNext(); if(!b.disabled){ if(i===4){ idx=(+daysInput.value>=30?5:6); } else idx=i+1; show(idx);} }));
-    prevs.forEach(b=>b.addEventListener('click',()=>{ if(idx>0){ idx--; if(idx===5&&+daysInput.value<30) idx=4; show(idx);} }));
-    show(0);
-  })();
+  const steps      = document.querySelectorAll('.form-step');
+  const nexts      = document.querySelectorAll('.btn-next');
+  const prevs      = document.querySelectorAll('.btn-prev');
+  const prog       = document.querySelector('.progress-inner');
+  const daysInput  = document.getElementById('days');
+  const daysVal    = document.getElementById('days-value');
+  const retDate    = document.getElementById('return-date');
+  const step5_5    = document.getElementById('step5-5');
+  const increase   = document.getElementById('days-increase');
+  const decrease   = document.getElementById('days-decrease');
+  const pZip       = document.getElementById('p-zip');
+  const cZip       = document.getElementById('c-zip');
+  const pAddress   = document.getElementById('p-address');
+  const cAddress   = document.getElementById('c-address');
+  const pLicense   = document.getElementById('p-license');
+  const optNone    = document.getElementById('opt-none');
+  const others     = [
+    document.getElementById('opt-insurance'),
+    document.getElementById('opt-waiver'),
+    document.getElementById('opt-tire'),
+    document.getElementById('opt-etc'),
+    document.getElementById('opt-navi')
+  ];
+  let idx = 0;
+
+  function updateProgress(){
+    prog.style.width = (idx / (steps.length - 1) * 100) + '%';
+  }
+
+  function updateNext(){
+    const ins = Array.from(steps[idx].querySelectorAll('input,select,textarea'));
+    nexts[idx].disabled = !ins.every(i => i.disabled || i.checkValidity());
+  }
+
+  function calcReturn(){
+    const sd = document.getElementById('start-date').value;
+    const days = +daysInput.value;
+    if(sd){
+      const d = new Date(sd);
+      d.setDate(d.getDate() + days);
+      retDate.value = d.toISOString().slice(0,10);
+    }
+  }
+
+  function show(i){
+    steps.forEach((s,j) => s.classList.toggle('active', j === i));
+    updateProgress();
+
+    // Step2: 個人／法人
+    if(i === 1){
+      const corp = document.getElementById('use-corporate').checked;
+      document.getElementById('personal-info').style.display  = corp ? 'none' : 'block';
+      document.getElementById('corporate-info').style.display = corp ? 'block' : 'none';
+      document.querySelectorAll('#personal-info input,#personal-info select,#personal-info textarea')
+        .forEach(e => e.disabled = corp);
+      document.querySelectorAll('#corporate-info input,#corporate-info select,#corporate-info textarea')
+        .forEach(e => e.disabled = !corp);
+    }
+
+    // Step5: 日数入力でStep5.5の表示制御
+    if(i === 4){
+      calcReturn();
+      step5_5.style.display = (+daysInput.value >= 30 ? 'block' : 'none');
+    }
+
+    // Step5.5: 強制表示
+    if(i === 5){
+      step5_5.style.display = 'block';
+    }
+
+    // 30日未満は5->6自動スキップ
+    if(i === 5 && +daysInput.value < 30){
+      idx = 6;
+      show(idx);
+      return;
+    }
+
+    // Step7: 支払／注意事項の表示切替
+    if(i === steps.length - 1){
+      const corp = document.getElementById('use-corporate').checked;
+      document.getElementById('terms-personal').style.display  = corp ? 'none' : 'block';
+      document.getElementById('terms-corporate').style.display = corp ? 'block' : 'none';
+      document.querySelectorAll('#terms-personal input').forEach(e => e.disabled = corp);
+      document.querySelectorAll('#terms-corporate input').forEach(e => e.disabled = !corp);
+    }
+
+    updateNext();
+  }
+
+  // イベントリスナー登録
+  steps.forEach(step => {
+    Array.from(step.querySelectorAll('input,select,textarea')).forEach(e => {
+      e.addEventListener('input',  updateNext);
+      e.addEventListener('change', updateNext);
+    });
+  });
+
+  // 日数増減ボタン
+  increase.addEventListener('click', () => {
+    daysInput.value = +daysInput.value + 1;
+    daysVal.textContent = daysInput.value;
+    calcReturn();
+    updateNext();
+  });
+  decrease.addEventListener('click', () => {
+    if(+daysInput.value > 7) daysInput.value = +daysInput.value - 1;
+    daysVal.textContent = daysInput.value;
+    calcReturn();
+    updateNext();
+  });
+
+  // 郵便番号：数字以外除去＋BlurでAPI取得
+  [pZip, cZip].forEach(z => {
+    z.addEventListener('input', () => z.value = z.value.replace(/[^0-9]/g, ''));
+    z.addEventListener('blur', () => {
+      fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
+        .then(r => r.json())
+        .then(j => {
+          if(j.results){
+            const adr = j.results[0].address1 + j.results[0].address2 + j.results[0].address3;
+            (z === pZip ? pAddress : cAddress).value = adr;
+          }
+        });
+    });
+  });
+
+  // 運転免許番号バリデーション
+  pLicense.addEventListener('input', () => {
+    if(pLicense.value.length > 0 && pLicense.value.length !== 12){
+      pLicense.setCustomValidity('12ケタの数字を入力してください');
+    } else {
+      pLicense.setCustomValidity('');
+    }
+    pLicense.reportValidity();
+  });
+
+  // オプション排他制御
+  optNone.addEventListener('change', () => {
+    if(optNone.checked) others.forEach(o => o.checked = false);
+    updateNext();
+  });
+  others.forEach(o => o.addEventListener('change', () => {
+    if(o.checked) optNone.checked = false;
+    updateNext();
+  }));
+
+  // ナビゲーション
+  nexts.forEach((b,i) => b.addEventListener('click', () => {
+    updateNext();
+    if(!b.disabled){
+      if(i === 4) idx = (+daysInput.value >= 30 ? 5 : 6);
+      else idx = i + 1;
+      show(idx);
+    }
+  }));
+  prevs.forEach(b => b.addEventListener('click', () => {
+    if(idx > 0){ idx--; if(idx === 5 && +daysInput.value < 30) idx = 4; show(idx); }
+  }));
+
+  // 初期表示
+  show(0);
+})();
+
   </script>
 </body>
 </html>
