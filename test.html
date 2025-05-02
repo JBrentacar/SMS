@@ -162,8 +162,8 @@
 
     </form>
   </div>
-  <script>
-  (function(){
+ <script>
+(function(){
   const steps      = document.querySelectorAll('.form-step');
   const nexts      = document.querySelectorAll('.btn-next');
   const prevs      = document.querySelectorAll('.btn-prev');
@@ -209,10 +209,14 @@
   }
 
   function show(i){
+    // まず全ステップ更新
     steps.forEach((s,j) => s.classList.toggle('active', j === i));
     updateProgress();
 
-    // Step2: 個人／法人
+    // ステップ5.5 は一旦隠す
+    step5_5.style.display = 'none';
+
+    // Step2: 個人／法人 切替
     if(i === 1){
       const corp = document.getElementById('use-corporate').checked;
       document.getElementById('personal-info').style.display  = corp ? 'none' : 'block';
@@ -226,15 +230,17 @@
     // Step5: 日数入力でStep5.5の表示制御
     if(i === 4){
       calcReturn();
-      step5_5.style.display = (+daysInput.value >= 30 ? 'block' : 'none');
+      if(+daysInput.value >= 30){
+        step5_5.style.display = 'block';
+      }
     }
 
-    // Step5.5: 強制表示
+    // ステップ5.5 固定表示
     if(i === 5){
       step5_5.style.display = 'block';
     }
 
-    // 30日未満は5->6自動スキップ
+    // 30日未満は5->6へ自動スキップ
     if(i === 5 && +daysInput.value < 30){
       idx = 6;
       show(idx);
