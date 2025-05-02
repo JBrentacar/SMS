@@ -42,9 +42,11 @@
   margin-right: 0.5rem; /* ボタン同士の間隔 */
   margin-bottom: 0.5rem; /* 折り返し後にも余白 */
 }
-/* ステップ4がアクティブなときだけ */
-.form-step.active[data-step="4"] .switch {
-  display: block !important;
+/* ステップ4 の「項目／トグル」を横並びで縦に積む */
+.option-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.75rem;
 }
 
@@ -106,19 +108,72 @@
         <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
 
-      <!-- Step 4 -->
-      <div class="form-step" data-step="4">
-        <div class="form-group"><label>オプション <span style="color:red">*</span></label>
-          <label class="switch"><input type="checkbox" id="opt-insurance" name="オプション[]" value="車両保険"><span class="slider"></span></label>車両保険
-          <label class="switch"><input type="checkbox" id="opt-waiver" name="オプション[]" value="免責補償"><span class="slider"></span></label>免責補償
-          <label class="switch"><input type="checkbox" id="opt-tire" name="オプション[]" value="スタッドレスタイヤ"><span class="slider"></span></label>スタッドレスタイヤ
-          <label class="switch"><input type="checkbox" id="opt-etc" name="オプション[]" value="ETC"><span class="slider"></span></label>ETC
-          <label class="switch"><input type="checkbox" id="opt-navi" name="オプション[]" value="カーナビ"><span class="slider"></span></label>カーナビ
-          <label class="switch"><input type="checkbox" id="opt-none" name="オプション[]" value="全て加入しない"><span class="slider"></span></label>全て加入しない
-        </div>
-        <p class="note">空き状況によりご案内不可のオプションもございます。<br>スタッドレスタイヤは12月～3月の間、必須オプションとなります。ご契約途中での加入は出来かねます。ご注意ください。</p>
-        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
-      </div>
+   <!-- Step 4 -->
+<div class="form-step" data-step="4">
+  <div class="form-group">
+    <label>オプション <span style="color:red">*</span></label>
+
+    <div class="option-row">
+      <span>車両保険</span>
+      <label class="switch">
+        <input type="checkbox" id="opt-insurance" name="オプション[]" value="車両保険">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="option-row">
+      <span>免責補償</span>
+      <label class="switch">
+        <input type="checkbox" id="opt-waiver" name="オプション[]" value="免責補償">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="option-row">
+      <span>スタッドレスタイヤ</span>
+      <label class="switch">
+        <input type="checkbox" id="opt-tire" name="オプション[]" value="スタッドレスタイヤ">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="option-row">
+      <span>ETC</span>
+      <label class="switch">
+        <input type="checkbox" id="opt-etc" name="オプション[]" value="ETC">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="option-row">
+      <span>カーナビ</span>
+      <label class="switch">
+        <input type="checkbox" id="opt-navi" name="オプション[]" value="カーナビ">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="option-row">
+      <span>全て加入しない</span>
+      <label class="switch">
+        <input type="checkbox" id="opt-none" name="オプション[]" value="全て加入しない">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <p class="note">
+    空き状況によりご案内不可のオプションもございます。<br>
+    スタッドレスタイヤは12月～3月の間、必須オプションとなります。
+    ご契約途中での加入は出来かねます。ご注意ください。
+  </p>
+
+  <div class="button-group">
+    <button type="button" class="btn-prev">戻る</button>
+    <button type="button" class="btn-next" disabled>次へ</button>
+  </div>
+</div>
+
 
     <!-- Step 5 -->
 <div class="form-step" data-step="5">
@@ -201,24 +256,41 @@
         <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
 
-      <!-- Step 7 -->
-      <div class="form-step" data-step="7">
-        <div id="terms-personal">
-          <div class="form-group"><input type="checkbox" id="t1" name="お支払方法_personal" value="クレジットカードのみ" required><label for="t1" style="display:inline; font-weight:normal;">お支払方法は、原則クレジットカードのみとなります。（お持ちでない方は事前にご連絡ください。）</label></div>
-          <div class="form-group"><input type="checkbox" id="t2" name="注意事項_personal" value="空車状況により案内不可" required><label for="t2" style="display:inline; font-weight:normal;">ご申請頂いた場合でも、車両空き状況により、ご案内できない場合がございます。</label></div>
-        </div>
-        <div id="terms-corporate">
-          <div class="form-group"><label>お支払方法 <span style="color:red">*</span></label><input type="radio" name="お支払方法_corporate" value="銀行振込（前日まで）" required><label style="display:inline; font-weight:normal;">前日までに銀行振込（前日が土日祝日の場合、前金融機関営業日まで）</label><br><input type="radio" name="お支払方法_corporate" value="現金"><label style="display:inline; font-weight:normal;">お引渡し日 現金支払い</label><br><input type="radio" name="お支払方法_corporate" value="カード"><label style="display:inline; font-weight:normal;">お引渡し日 カード決済</label></div>
-          <div class="form-group"><input type="checkbox" id="corp-seal" name="注意事項_corporate" value="印鑑証明書必要"><label for="corp-seal" style="display:inline; font-weight:normal;">場合により、法人印鑑証明書等のご提出を求める場合がございます。</label></div>
-          <div class="form-group"><input type="checkbox" id="corp-note" name="注意事項_corporate" value="空車状況により案内不可" required><label for="corp-note" style="display:inline; font-weight:normal;">ご申請頂いた場合でも、車両空き状況により、ご案内できない場合がございます。</label></div>
-        </div>
-        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="submit">送信する</button></div>
-      </div>
+     <!-- Step 7 -->
+<div class="form-step" data-step="7">
+  <p class="note">内容をご確認頂き、□をタップしてチェックを入れてください。</p>
+  <div id="terms-personal">
+    <div class="form-group">
+      <input type="checkbox" id="t1" name="お支払方法_personal" value="クレジットカードのみ" required>
+      <label for="t1">お支払方法は、原則クレジットカードのみとなります。</label>
+    </div>
+    <div class="form-group">
+      <input type="checkbox" id="t2" name="注意事項_personal" value="空車状況により案内不可" required>
+      <label for="t2">ご申請頂いても空車状況により、ご案内できない場合があります。</label>
+    </div>
+  </div>
+  <div id="terms-corporate">
+    <!-- 法人用ラジオ＆チェック群（既存） -->
+  </div>
+  <div class="button-group">
+    <button type="button" class="btn-prev">戻る</button>
+    <!-- 通常の submit をボタンに置き換え -->
+    <button type="button" id="submit-btn" disabled>送信する</button>
+  </div>
+</div>
+
 
     </form>
   </div>
 <script>
+<script>
 ;(function(){
+  // 現在のステップを保持
+  let currentStepIndex = 0;
+
+  const form      = document.getElementById('rentalForm');
+  const submitBtn = document.getElementById('submit-btn'); // HTML の送信ボタンに id="submit-btn" をつけておいてください
+
   const steps     = document.querySelectorAll('.form-step');
   const nexts     = document.querySelectorAll('.btn-next');
   const prevs     = document.querySelectorAll('.btn-prev');
@@ -239,7 +311,7 @@
   const delTimeGrp = document.getElementById('delivery-time-group');
   const delTimeSel = document.getElementById('delivery-time-select');
 
-  // 日数増減ボタン（ID注意！）
+  // 日数増減ボタン
   const decrease  = document.getElementById('days-decrease');
   const increase  = document.getElementById('days-increase');
 
@@ -258,15 +330,21 @@
     document.getElementById('opt-navi')
   ];
 
+  // Step7 の同意チェック要素群
+  const personalRequired  = Array.from(document.querySelectorAll('#terms-personal input[required]'));
+  const corporateRequired = Array.from(document.querySelectorAll('#terms-corporate input[required]'));
+
   let idx = 0;
 
   function updateProgress(){
     prog.style.width = (idx / (steps.length - 1) * 100) + '%';
   }
+
   function updateNext(){
     const fields = Array.from(steps[idx].querySelectorAll('input,select,textarea'));
     nexts[idx].disabled = !fields.every(f => f.disabled || f.checkValidity());
   }
+
   function calcReturn(){
     const sd = document.getElementById('start-date').value;
     const days = +daysInput.value;
@@ -276,6 +354,7 @@
       retDate.value = d.toISOString().slice(0,10);
     }
   }
+
   function populateVisitTimes(){
     visitSel.innerHTML = '';
     const sd = document.getElementById('start-date').value;
@@ -290,6 +369,7 @@
       visitSel.insertAdjacentHTML('beforeend', `<option value="${txt}">${txt}</option>`);
     }
   }
+
   function populateDeliveryTimes(){
     delTimeSel.innerHTML = '';
     for(let h=10; h<17; h++){
@@ -299,34 +379,34 @@
       delTimeSel.insertAdjacentHTML('beforeend', `<option value="${o2}">${o2}</option>`);
     }
   }
- // ① クイック日数選択ボタン (7日／14日／30日／60日／90日) の処理
+
+  // クイック日数選択
   document.querySelectorAll('.btn-day').forEach(btn => {
     btn.addEventListener('click', () => {
-      const d = +btn.dataset.days;      // data-days属性から日数取得
-      daysInput.value    = d;           // hidden input にセット
-      daysVal.textContent = d;          // 画面表示も更新
-      calcReturn();                     // 返却日再計算
-      updateNext();                     // 次へボタン活性化チェック
+      const d = +btn.dataset.days;
+      daysInput.value     = d;
+      daysVal.textContent = d;
+      calcReturn();
+      updateNext();
     });
   });
 
-  // ② ご利用開始日の水曜＆祝日チェック
+  // 利用開始日の定休日（水曜/祝日）チェック
   document.getElementById('start-date').addEventListener('change', async e => {
-    const selDate = e.target.value;              // "YYYY-MM-DD"
+    const selDate = e.target.value;
     const errP    = document.getElementById('date-error');
     let errText   = '';
 
-    // 水曜日チェック
-    const day = new Date(selDate).getDay();      // 0=日,1=月…3=水
-    if (day === 3) {
+    // 水曜チェック
+    const day = new Date(selDate).getDay();
+    if(day === 3){
       errText = 'ご選択した日は定休日（水曜日）です。別日を選択してください。';
     } else {
-      // 祝日API取得 (holidays-jp 例)
       try {
         const year = selDate.slice(0,4);
         const res  = await fetch(`https://holidays-jp.github.io/api/v1/${year}.json`);
         const data = await res.json();
-        if (data[selDate]) {
+        if(data[selDate]){
           errText = `ご選択した日は「${data[selDate]}」の祝日です。別日を選択してください。`;
         }
       } catch {
@@ -334,23 +414,27 @@
       }
     }
 
-    if (errText) {
-      errP.textContent    = errText;
-      errP.style.display  = 'block';
+    if(errText){
+      errP.textContent   = errText;
+      errP.style.display = 'block';
       e.target.setCustomValidity('invalid');
     } else {
-      errP.style.display  = 'none';
+      errP.style.display = 'none';
       e.target.setCustomValidity('');
     }
     e.target.reportValidity();
   });
-  
+
+  // Step 表示切り替え
   function show(i){
+    // 現在のステップ更新
+    currentStepIndex = i;
+
     // 各ステップ表示切替
     steps.forEach((s,j)=> s.classList.toggle('active', j===i));
     updateProgress();
 
-    // Step2: 個人／法人 切替
+    // Step2 個人/法人
     if(i === 1){
       const isCorp = document.getElementById('use-corporate').checked;
       document.getElementById('personal-info' ).style.display = isCorp ? 'none'  : 'block';
@@ -361,46 +445,67 @@
         .forEach(e=> e.disabled = !isCorp);
     }
 
-    // まず5.5は全部隠す
+    // Step5.5 はいったん全部隠す
     step55.style.display = 'none';
-    [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
+    [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=> el.classList.add('hidden'));
 
-    // Step5.5 表示内容切替
-  if(i === 5){
-    step55.style.display = 'block';
-    const days = +daysInput.value;
-
-    if(days < 30){
-      // 7～29日：来店時刻だけ
-      visitGrp.classList.remove('hidden');
-      populateVisitTimes();
-
-    } else {
-      // 30日以上：まず配送サービス利用の有無を表示
-      delSvcGrp.classList.remove('hidden');
-
-      // デフォルトでは「利用しない」が選択されているのでその場合のみ来店時刻を表示
-      if(document.getElementById('del-no').checked){
+    // Step5.5 の切り替え
+    if(i === 5){
+      step55.style.display = 'block';
+      const days = +daysInput.value;
+      if(days < 30){
         visitGrp.classList.remove('hidden');
         populateVisitTimes();
+      } else {
+        delSvcGrp.classList.remove('hidden');
+        // デフォルト「利用しない」時は来店時刻も同時に表示
+        if(document.getElementById('del-no').checked){
+          visitGrp.classList.remove('hidden');
+          populateVisitTimes();
+        }
       }
-      // ※ populateDeliveryTimes は「利用する」を選んだときのイベントハンドラ内で呼び出します
     }
-  }
-    // Step5 で7日未満なら丸め
+
+    // Step5 で 7日未満は丸め
     if(i===4 && +daysInput.value < 7){
-      daysInput.value = 7;
+      daysInput.value     = 7;
       daysVal.textContent = '7';
       calcReturn();
     }
-   if (i === 7) {
-       const isCorp = document.getElementById('use-corporate').checked;
-       document.getElementById('terms-personal').style.display  = isCorp ? 'none'  : 'block';
-       document.getElementById('terms-corporate').style.display = isCorp ? 'block' : 'none';
-     }
+
+    // Step7 入場時は送信ボタン状態を更新
+    if(i === 7) updateSubmitButton();
 
     updateNext();
   }
+
+  // Step7 の送信可否判定
+  function updateSubmitButton(){
+    let ok = false;
+    if(currentStepIndex === 7){
+      if(document.getElementById('use-corporate').checked){
+        ok = corporateRequired.every(i => {
+          if(i.type === 'radio'){
+            return !!form.querySelector(`input[name="${i.name}"]:checked`);
+          }
+          return i.checked;
+        });
+      } else {
+        ok = personalRequired.every(i => i.checked);
+      }
+    }
+    submitBtn.disabled = !ok;
+  }
+
+  // 各同意チェックに change イベント
+  [...personalRequired, ...corporateRequired].forEach(el =>
+    el.addEventListener('change', updateSubmitButton)
+  );
+
+  // 送信ボタンの click 抑制
+  submitBtn.addEventListener('click', e => {
+    if(submitBtn.disabled) e.preventDefault();
+  });
 
   // イベント登録
   steps.forEach(step=>{
@@ -409,6 +514,7 @@
       el.addEventListener('change', updateNext);
     });
   });
+
   increase.addEventListener('click', ()=>{
     daysInput.value++;
     daysVal.textContent = daysInput.value;
@@ -424,97 +530,12 @@
     }
   });
 
-  // 郵便番号API → 住所自動入力
+  // 郵便番号API
   [pZip,cZip].forEach(z=>{
     if(!z) return;
     z.addEventListener('input', ()=> z.value = z.value.replace(/\D/g,''));
-    z.addEventListener('blur', ()=>{
-      fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
-        .then(r=>r.json()).then(j=>{
-          if(j.results){
-            const a = j.results[0];
-            const addr = a.address1 + a.address2 + a.address3;
-            (z===pZip? pAddress: cAddress).value = addr;
-          }
-        });
-    });
-  });
+    z.add
 
-  // 免許証12桁バリデーション
-  if(pLicense){
-    pLicense.addEventListener('input', ()=>{
-      if(pLicense.value && pLicense.value.length!==12) pLicense.setCustomValidity('12ケタで入力してください');
-      else pLicense.setCustomValidity('');
-      pLicense.reportValidity();
-    });
-  }
-
-  // オプション排他制御
-  if(optNone){
-    optNone.addEventListener('change', ()=>{ if(optNone.checked) others.forEach(o=>o.checked=false); updateNext(); });
-  }
-  others.forEach(o=>{
-    if(!o) return;
-    o.addEventListener('change', ()=>{
-      if(o.checked) optNone.checked = false;
-      updateNext();
-    });
-  });
-
-  // 配送サービス選択
- // 配送サービス「利用する」を選んだら…
-document.getElementById('del-yes').addEventListener('change', ()=>{
-  // 来店時刻は隠す
-  visitGrp.classList.add('hidden');
-  // 配送サービス詳細だけ表示
-  locGrp.classList.remove('hidden');
-  delTimeGrp.classList.remove('hidden');
-  // 異なる住所なら配送先入力も表示
-  if (document.getElementById('loc-different').checked) {
-    addrGrp.classList.remove('hidden');
-  }
-  // 配送時間プルダウンを用意
-  populateDeliveryTimes();
-  updateNext();
-});
-
-// 配送サービス「利用しない」を選んだら…
-document.getElementById('del-no').addEventListener('change', ()=>{
-  // 配送詳細だけ隠す（delSvcGrp は隠さない）
-  [locGrp, addrGrp, delTimeGrp].forEach(el=> el.classList.add('hidden'));
-  // 来店時刻を必ず表示
-  visitGrp.classList.remove('hidden');
-  populateVisitTimes();
-  updateNext();
-});
-
-  // 配送場所選択
-  document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
-  document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
-
-  // 「次へ／戻る」ナビ
-  nexts.forEach((btn,i)=>{
-    btn.addEventListener('click', ()=>{
-      if(btn.disabled) return;
-      if(i===4)      idx = 5;  // Step5→Step5.5
-      else if(i===5) idx = 6;  // Step5.5→Step6
-      else            idx = i+1;
-      show(idx);
-    });
-  });
-  prevs.forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      if(idx>0){
-        idx--;
-        show(idx);
-      }
-    });
-  });
-
-  // 初期表示
-  show(0);
-
-})();
 </script>
 
 
