@@ -121,12 +121,7 @@
 
       <!-- Step 5.5 -->
       <div class="form-step" data-step="5.5" id="step5-5">
-        <!-- 来店時刻 -->
-        <div id="visit-time-group" class="form-group hidden">
-          <label>ご来店予定時刻 <span style="color:red">*</span></label>
-          <select id="visit-time-select" name="来店予定時刻" required></select>
-          <p class="note">営業時間 平日 9:00〜18:00（水曜除く）／土日 10:00〜16:00（定休日：水・祝日）</p>
-        </div>
+        
         <!-- 配送サービス -->
         <div id="delivery-service-group" class="form-group hidden">
           <label>配送サービス利用の有無 <span style="color:red">*</span></label>
@@ -150,6 +145,12 @@
         </div>
         <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
+      <!-- 来店時刻 -->
+        <div id="visit-time-group" class="form-group hidden">
+          <label>ご来店予定時刻 <span style="color:red">*</span></label>
+          <select id="visit-time-select" name="来店予定時刻" required></select>
+          <p class="note">営業時間 平日 9:00〜18:00（水曜除く）／土日 10:00〜16:00（定休日：水・祝日）</p>
+        </div>
 
       <!-- Step 6 -->
       <div class="form-step" data-step="6">
@@ -281,23 +282,25 @@
     [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
 
     // Step5.5 表示内容切替
-    if(i === 5){
+  if(i === 5){
     step55.style.display = 'block';
     const days = +daysInput.value;
+
     if(days < 30){
-      // 7～29日はこれまでどおり
+      // 7～29日：来店時刻だけ
       visitGrp.classList.remove('hidden');
       populateVisitTimes();
-    } else {
-      // 30日以上はまず配送サービス問い
-      delSvcGrp.classList.remove('hidden');
-      populateDeliveryTimes();
 
-      // 追加：デフォルト「利用しない」がチェックされていたら
+    } else {
+      // 30日以上：まず配送サービス利用の有無を表示
+      delSvcGrp.classList.remove('hidden');
+
+      // デフォルトでは「利用しない」が選択されているのでその場合のみ来店時刻を表示
       if(document.getElementById('del-no').checked){
         visitGrp.classList.remove('hidden');
         populateVisitTimes();
       }
+      // ※ populateDeliveryTimes は「利用する」を選んだときのイベントハンドラ内で呼び出します
     }
   }
     // Step5 で7日未満なら丸め
