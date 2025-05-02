@@ -374,17 +374,31 @@
   });
 
   // 配送サービス選択
-  document.getElementById('del-yes').addEventListener('change', ()=>{
-    locGrp.classList.remove('hidden');
-    delTimeGrp.classList.remove('hidden');
-    if(document.getElementById('loc-different').checked) addrGrp.classList.remove('hidden');
-  });
-  document.getElementById('del-no').addEventListener('change', ()=>{
-    [delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=>el.classList.add('hidden'));
-    visitGrp.classList.remove('hidden');
-    populateVisitTimes();
-    updateNext();
-  });
+ // 配送サービス「利用する」を選んだら…
+document.getElementById('del-yes').addEventListener('change', ()=>{
+  // 来店時刻は隠す
+  visitGrp.classList.add('hidden');
+  // 配送サービス詳細だけ表示
+  locGrp.classList.remove('hidden');
+  delTimeGrp.classList.remove('hidden');
+  // 異なる住所なら配送先入力も表示
+  if (document.getElementById('loc-different').checked) {
+    addrGrp.classList.remove('hidden');
+  }
+  // 配送時間プルダウンを用意
+  populateDeliveryTimes();
+  updateNext();
+});
+
+// 配送サービス「利用しない」を選んだら…
+document.getElementById('del-no').addEventListener('change', ()=>{
+  // 配送詳細だけ隠す（delSvcGrp は隠さない）
+  [locGrp, addrGrp, delTimeGrp].forEach(el=> el.classList.add('hidden'));
+  // 来店時刻を必ず表示
+  visitGrp.classList.remove('hidden');
+  populateVisitTimes();
+  updateNext();
+});
 
   // 配送場所選択
   document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
