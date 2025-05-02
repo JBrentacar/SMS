@@ -198,16 +198,21 @@
   </div>
 <script>
 (function(){
+  // 各ステップ要素、ナビボタン、プログレスバー
   const steps      = document.querySelectorAll('.form-step');
   const nexts      = document.querySelectorAll('.btn-next');
   const prevs      = document.querySelectorAll('.btn-prev');
   const prog       = document.querySelector('.progress-inner');
+
+  // ステップ5関連
   const daysInput  = document.getElementById('days');
   const daysVal    = document.getElementById('days-value');
   const retDate    = document.getElementById('return-date');
+
+  // ステップ5.5全体 container
   const step55     = document.getElementById('step5-5');
 
-  // Step5.5 用要素
+  // ステップ5.5中の各グループ
   const visitGrp   = document.getElementById('visit-time-group');
   const visitSel   = document.getElementById('visit-time-select');
   const delSvcGrp  = document.getElementById('delivery-service-group');
@@ -216,9 +221,11 @@
   const delTimeGrp = document.getElementById('delivery-time-group');
   const delTimeSel = document.getElementById('delivery-time-select');
 
-  // 既存要素
+  // 日数増減ボタン
   const increase   = document.getElementById('days-increase');
   const decrease   = document.getElementById('days-decrease');
+
+  // その他既存要素（郵便番号API、免許番号、オプションなど）
   const pZip       = document.getElementById('p-zip');
   const cZip       = document.getElementById('c-zip');
   const pAddress   = document.getElementById('p-address');
@@ -235,15 +242,18 @@
 
   let idx = 0;
 
+  // プログレスバー更新
   function updateProgress(){
     prog.style.width = (idx / (steps.length - 1) * 100) + '%';
   }
 
+  // 次へボタン有効化判定
   function updateNext(){
     const ins = Array.from(steps[idx].querySelectorAll('input,select,textarea'));
     nexts[idx].disabled = !ins.every(i => i.disabled || i.checkValidity());
   }
 
+  // 返却予定日計算
   function calcReturn(){
     const sd = document.getElementById('start-date').value;
     const days = +daysInput.value;
@@ -254,83 +264,82 @@
     }
   }
 
+  // 来店時刻オプション生成（15分刻み）
   function populateVisitTimes(){
     visitSel.innerHTML = '';
     const sdVal = document.getElementById('start-date').value;
     const d = sdVal ? new Date(sdVal) : new Date();
-    const day = d.getDay();
-    const startH = (day>=1 && day<=5)?9:10;
-    const endH   = (day>=1 && day<=5)?17.5:15.5;
-    for(let t=startH; t<endH; t+=0.25){
+    const day = d.getDay(); // 0:日曜,1~5:平日,6:土曜
+    const startH = (day>=1 && day<=5) ? 9   : 10;
+    const endH   = (day>=1 && day<=5) ? 17.5: 15.5;
+    for(let t = startH; t < endH; t += 0.25){
       const hh  = Math.floor(t),
-            mm  = Math.round((t-hh)*60),
-            t2  = t+0.25,
+            mm  = Math.round((t - hh) * 60),
+            t2  = t + 0.25,
             hh2 = Math.floor(t2),
-            mm2 = Math.round((t2-hh2)*60),
+            mm2 = Math.round((t2 - hh2) * 60),
             txt = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}〜${String(hh2).padStart(2,'0')}:${String(mm2).padStart(2,'0')}`;
       visitSel.insertAdjacentHTML('beforeend', `<option value="${txt}">${txt}</option>`);
     }
   }
 
+  // 配送希望時間生成（30分刻み）
   function populateDeliveryTimes(){
     delTimeSel.innerHTML = '';
-    for(let h=10; h<17; h++){
-      const o1 = `${String(h).padStart(2,'0')}:00〜${String(h).padStart(2,'0')}:30`,
-            o2 = `${String(h).padStart(2,'0')}:30〜${String(h+1).padStart(2,'0')}:00`;
+    for(let h = 10; h < 17; h++){
+      const o1 = `${String(h).padStart(2,'0')}:00〜${String(h).padStart(2,'0')}:30`;
+      const o2 = `${String(h).padStart(2,'0')}:30〜${String(h+1).padStart(2,'0')}:00`;
       delTimeSel.insertAdjacentHTML('beforeend', `<option value="${o1}">${o1}</option>`);
       delTimeSel.insertAdjacentHTML('beforeend', `<option value="${o2}">${o2}</option>`);
     }
   }
 
+  // ステップ表示切り替え
   function show(i){
-    // 各ステップ表示制御
-    steps.forEach((s,j)=> s.classList.toggle('active', j === i));
+    // 1) アクティブステップ切り替え
+    steps.forEach((s,j)=> s.classList.toggle('active', j===i));
     updateProgress();
 
-    // Step5.5 関連要素は一旦隠す
+    // 2) Step5.5全要素隠す
     step55.style.display = 'none';
-    visitGrp.classList.add('hidden');
-    delSvcGrp.classList.add('hidden');
-    locGrp.classList.add('hidden');
-    addrGrp.classList.add('hidden');
-    delTimeGrp.classList.add('hidden');
+    [visitGrp,delSvcGrp,locGrp,addrGrp,delTimeGrp].forEach(el=> el.classList.add('hidden'));
 
-    // Step2: 個人/法人 切り替え （略）
+    // 3) 個人/法人切替（省略。前のまま残してください）
 
-    // Step5 は index=4 → Step5.5 は index=5
+    // 4) ステップ5.5表示＆中身切替
     if(i === 5){
       step55.style.display = 'block';
       const days = +daysInput.value;
       if(days < 30){
-        // 7〜29日: 来店予定時刻
+        // 7～29日→来店時刻のみ
         visitGrp.classList.remove('hidden');
         populateVisitTimes();
       } else {
-        // 30日以上: 配送サービス利用の有無
+        // 30日以上→配送サービス問う
         delSvcGrp.classList.remove('hidden');
         populateDeliveryTimes();
       }
     }
 
-    // 7日未満の自動補正
-    if(i === 4 && +daysInput.value < 7){
+    // 5) ステップ５で7日未満入力した場合は自動７日に丸め
+    if(i===4 && +daysInput.value < 7){
       daysInput.value = 7;
       daysVal.textContent = 7;
       calcReturn();
     }
 
-    // 「次へ」有効化
     updateNext();
   }
 
-  // イベント登録
+  // 初回バリデーション／イベント登録
   steps.forEach(step=>{
-    step.querySelectorAll('input,select,textarea').forEach(e=>{
-      e.addEventListener('input', updateNext);
-      e.addEventListener('change', updateNext);
+    step.querySelectorAll('input,select,textarea').forEach(el=>{
+      el.addEventListener('input', updateNext);
+      el.addEventListener('change', updateNext);
     });
   });
 
+  // 日数増減ボタン
   increase.addEventListener('click', ()=>{
     daysInput.value = +daysInput.value + 1;
     daysVal.textContent = daysInput.value;
@@ -346,24 +355,88 @@
     }
   });
 
-  // 郵便番号＆API, 免許番号バリデーション, オプション排他, 配送サービス／来店時刻 切り替え...
-  // （前回のスクリプト内容をそのまま残してください）
+  // 郵便番号API連携＋数字以外除去
+  [pZip,cZip].forEach(z=>{
+    if(!z) return;
+    z.addEventListener('input', ()=> z.value = z.value.replace(/[^0-9]/g,''));
+    z.addEventListener('blur', ()=>{
+      fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z.value}`)
+        .then(r=>r.json()).then(j=>{
+          if(j.results){
+            const adr = j.results[0].address1 + j.results[0].address2 + j.results[0].address3;
+            (z===pZip? pAddress : cAddress).value = adr;
+          }
+        });
+    });
+  });
 
-  // ナビゲーション
-  nexts.forEach((b,i)=> b.addEventListener('click', ()=>{
-    if(!b.disabled){
-      idx = i + 1;
-      show(idx);
-    }
-  }));
-  prevs.forEach(b=> b.addEventListener('click', ()=>{
-    if(idx > 0){
-      idx--;
-      show(idx);
-    }
-  }));
+  // 免許番号12桁チェック
+  if(pLicense){
+    pLicense.addEventListener('input', ()=>{
+      if(pLicense.value && pLicense.value.length!==12){
+        pLicense.setCustomValidity('12ケタの数字を入力してください');
+      } else {
+        pLicense.setCustomValidity('');
+      }
+      pLicense.reportValidity();
+    });
+  }
 
-  // 初期表示
+  // オプション「全て加入しない」排他制御
+  if(optNone){
+    optNone.addEventListener('change', ()=>{
+      if(optNone.checked) others.forEach(o=> o.checked=false);
+      updateNext();
+    });
+  }
+  others.forEach(o=>{
+    if(!o) return;
+    o.addEventListener('change', ()=>{
+      if(o.checked) optNone.checked = false;
+      updateNext();
+    });
+  });
+
+  // 配送サービスラジオ切替
+  document.getElementById('del-yes').addEventListener('change', ()=>{
+    locGrp.classList.remove('hidden');
+    delTimeGrp.classList.remove('hidden');
+    if(document.getElementById('loc-different').checked){
+      addrGrp.classList.remove('hidden');
+    }
+  });
+  document.getElementById('del-no').addEventListener('change', ()=>{
+    visitGrp.classList.remove('hidden');
+    populateVisitTimes();
+  });
+
+  // 配送場所ラジオ切替
+  document.getElementById('loc-same').addEventListener('change', ()=> addrGrp.classList.add('hidden'));
+  document.getElementById('loc-different').addEventListener('change', ()=> addrGrp.classList.remove('hidden'));
+
+  // 「次へ／戻る」ナビ
+  nexts.forEach((btn,i)=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.disabled) return;
+      // ステップ5からは必ず 5→5.5
+      if(i === 4){
+        idx = 5;
+      } else {
+        idx = i + 1;
+      }
+      show(idx);
+    });
+  });
+  prevs.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(idx > 0){
+        idx--;
+        show(idx);
+      }
+    });
+  });
+
+  // 最初はステップ0を表示
   show(0);
 
 })();
