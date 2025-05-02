@@ -106,18 +106,41 @@
         <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
       </div>
 
-     <!-- Step 5 -->
-      <div class="form-step" data-step="5">
-        <div class="form-group"><label for="start-date">ご利用開始日 <span style="color:red">*</span></label><input type="date" id="start-date" name="ご利用開始日" required></div>
-        <div class="day-picker">
-          <button type="button" id="days-decrease">-</button>
-          <input type="hidden" id="days" name="ご利用日数" value="7">
-          <span id="days-value">7</span> 日
-          <button type="button" id="days-increase">+</button>
-        </div>
-        <div class="form-group"><label>ご返却予定日</label><input type="text" id="return-date" readonly></div>
-        <div class="button-group"><button type="button" class="btn-prev">戻る</button><button type="button" class="btn-next" disabled>次へ</button></div>
-      </div>
+    <!-- Step 5 -->
+<div class="form-step" data-step="5">
+  <div class="form-group">
+    <label for="start-date">ご利用開始日 <span style="color:red">*</span></label>
+    <input type="date" id="start-date" name="ご利用開始日" required>
+    <p id="date-error" class="note" style="color:red; display:none;"></p>
+  </div>
+  <div class="form-group">
+    <label>ご利用日数 <span style="color:red">*</span></label>
+    <!-- クイック選択ボタン -->
+    <div class="quick-days">
+      <button type="button" class="btn-day" data-days="7">7日</button>
+      <button type="button" class="btn-day" data-days="14">14日</button>
+      <button type="button" class="btn-day" data-days="30">30日</button>
+      <button type="button" class="btn-day" data-days="60">60日</button>
+      <button type="button" class="btn-day" data-days="90">90日</button>
+    </div>
+    <!-- 既存の日数ピッカー -->
+    <div class="day-picker">
+      <button type="button" id="days-decrease">-</button>
+      <input type="hidden" id="days" name="ご利用日数" value="30">
+      <span id="days-value">30</span> 日
+      <button type="button" id="days-increase">+</button>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>ご返却予定日</label>
+    <input type="text" id="return-date" readonly>
+  </div>
+  <div class="button-group">
+    <button type="button" class="btn-prev">戻る</button>
+    <button type="button" class="btn-next" disabled>次へ</button>
+  </div>
+</div>
+
 
       <!-- Step 5.5 -->
       <div class="form-step" data-step="5.5" id="step5-5">
@@ -261,7 +284,52 @@
       delTimeSel.insertAdjacentHTML('beforeend', `<option value="${o2}">${o2}</option>`);
     }
   }
+ // ① クイック日数選択ボタン (7日／14日／30日／60日／90日) の処理
+  document.querySelectorAll('.btn-day').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = +btn.dataset.days;      // data-days属性から日数取得
+      daysInput.value    = d;           // hidden input にセット
+      daysVal.textContent = d;          // 画面表示も更新
+      calcReturn();                     // 返却日再計算
+      updateNext();                     // 次へボタン活性化チェック
+    });
+  });
 
+  // ② ご利用開始日の水曜＆祝日チェック
+  document.getElementById('start-date').addEventListener('change', async e => {
+    const selDate = e.target.value;              // "YYYY-MM-DD"
+    const errP    = document.getElementById('date-error');
+    let errText   = '';
+
+    // 水曜日チェック
+    const day = new Date(selDate).getDay();      // 0=日,1=月…3=水
+    if (day === 3) {
+      errText = 'ご選択した日は定休日（水曜日）です。別日を選択してください。';
+    } else {
+      // 祝日API取得 (holidays-jp 例)
+      try {
+        const year = selDate.slice(0,4);
+        const res  = await fetch(`https://holidays-jp.github.io/api/v1/${year}.json`);
+        const data = await res.json();
+        if (data[selDate]) {
+          errText = `ご選択した日は「${data[selDate]}」の祝日です。別日を選択してください。`;
+        }
+      } catch {
+        console.warn('祝日API取得失敗');
+      }
+    }
+
+    if (errText) {
+      errP.textContent    = errText;
+      errP.style.display  = 'block';
+      e.target.setCustomValidity('invalid');
+    } else {
+      errP.style.display  = 'none';
+      e.target.setCustomValidity('');
+    }
+    e.target.reportValidity();
+  });
+  
   function show(i){
     // 各ステップ表示切替
     steps.forEach((s,j)=> s.classList.toggle('active', j===i));
