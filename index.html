@@ -123,7 +123,7 @@
       padding-top: 10px;
       margin-top: 10px;
     }
-    #extensionOutput {
+    #extensionOutput, #paymentOutput {
       width: 100%;
       margin-top: 10px;
       padding: 10px;
@@ -132,6 +132,7 @@
       box-sizing: border-box;
       font-family: inherit;
       font-size: 14px;
+      min-height: 200px;
     }
     .tires-section {
   background-color: #e6f7ff; /* 薄い青 */
@@ -238,6 +239,9 @@
       <div class="section-title">延長案内</div>
       <textarea id="extensionOutput" readonly></textarea>
       <button class="copy-btn" onclick="copyExtensionText()">延長案内をコピーする</button>
+      <div class="section-title" style="margin-top: 20px;">振込案内メッセージ</div>
+      <textarea id="paymentOutput" readonly></textarea>
+      <button class="copy-btn" onclick="copyPaymentText()">振込案内をコピーする</button>
     </div>
   </div>
 
@@ -397,6 +401,22 @@ try {
 
       catch(e) { console.error(e); ext+="\n※お振込期日の算出に失敗しました。"; }
       document.getElementById("extensionOutput").value = ext;
+
+      // 振込案内メッセージの生成
+      let payment = `お世話になっております。\nJBレンタカー石巻店です。\n\n延長のご連絡ありがとうございます。\n下記のとおりご案内致します。\n\nご利用開始日: ${fs}\nご返却日: ${fr}\nご利用日数: ${days}日間\nクラス: ${selectedCarClass}\n基本料金: ¥${totalBaseRate.toLocaleString()}\n`;
+      if(insuranceCost > 0) payment += `車両保険: ¥${insuranceCost.toLocaleString()}\n`;
+      if(waiverCost > 0)    payment += `免責補償: ¥${waiverCost.toLocaleString()}\n`;
+      if(tiresCost > 0)     payment += `スタッドレスタイヤ: ¥${tiresCost.toLocaleString()}\n`;
+      if(etcCost > 0)       payment += `ETC: ¥${etcCost.toLocaleString()}\n`;
+      if(gpsCost > 0)       payment += `カーナビ: ¥${gpsCost.toLocaleString()}\n`;
+      payment += `\n小計: ¥${subtotal.toLocaleString()}\n消費税(10%): ¥${tax.toLocaleString()}\n合計金額: ¥${total.toLocaleString()}\n`;
+      payment += `\n【お振込先】\n七十七銀行 新中里支店\n普通口座 5023291\n株式会社NIKKEN\n`;
+      try {
+        const payDate = await getValidPaymentDate(new Date(startDate));
+        payment += `\nお振込期日: ${formatDateGlobal(payDate)}\n`;
+      } catch(e) { console.error(e); payment += "\nお振込期日: ※算出に失敗しました\n"; }
+      payment += `\n以上、ご確認の上、ご対応の程、よろしくお願いいたします。`;
+      document.getElementById("paymentOutput").value = payment;
     }
     function copyTextToClipboard(text) {
       if(navigator.clipboard) return navigator.clipboard.writeText(text);
@@ -413,6 +433,10 @@ try {
     function copyExtensionText() {
       const t=document.getElementById('extensionOutput').value;
       copyTextToClipboard(t); alert('延長案内の内容をコピーしました！');
+    }
+    function copyPaymentText() {
+      const t=document.getElementById('paymentOutput').value;
+      copyTextToClipboard(t); alert('振込案内の内容をコピーしました！');
     }
     async function getValidPaymentDate(baseDate) {
       let d=new Date(baseDate); d.setDate(d.getDate()-1);
